@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-const Game = (function({Ctrls}) {
+const Game = (function({Ctrls, World}) {
 
   const _loop = {
     now: null,
@@ -31,11 +31,19 @@ const Game = (function({Ctrls}) {
   function _render(dt) {
     const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, 1280, 640);
+
+    World.renderBackground(ctx);
+    World.render('block_01', 4, ctx, 0, 0);
+    World.render('block_01', 5, ctx, 0, 0);
+    World.render('block_02', 4, ctx, 640, 0);
+    World.render('block_02', 5, ctx, 640, 0);
+
     Player.render(ctx);
   }
 
   function init() {
     Player.init();
+    World.init();
     window.requestAnimationFrame(_loop.loop.bind(_loop));
   }
 
@@ -48,4 +56,5 @@ const Game = (function({Ctrls}) {
   };
 }({
   Ctrls: new Controls(),
+  World: new Level(),
 }));

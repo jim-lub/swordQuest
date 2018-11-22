@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-const Player = (function({PlayerAnimations}) {
+const Player = (function({Animations}) {
   const self = {
     pos: {
       x: 150,
@@ -14,6 +14,20 @@ const Player = (function({PlayerAnimations}) {
     falling: false,
     touchingFloor: true
   };
+
+  function _setPlayerDirection() {
+    if (_isPressed('a') || _isPressed('d')) {
+      self.direction = (Events.listen('ctrls_key_a').timestamp.keyDown > Events.listen('ctrls_key_d').timestamp.keyDown) ? 'left' : 'right';
+    }
+  }
+
+  function _isPressed(key) {
+    return Events.listen(`ctrls_key_${key}`).active;
+  }
+
+  function _isClicked(btn) {
+    return Events.listen(`ctrls_mouse_${btn}`).active;
+  }
 
   const _machine = {
     dispatch(actionName, ...data) {
@@ -58,9 +72,9 @@ const Player = (function({PlayerAnimations}) {
 
   function _idle() {
     if (_isClicked('leftClick')) {
-      PlayerAnimations.play('attack', self.direction);
+      Animations.play('attack', self.direction);
     } else {
-      PlayerAnimations.play('idle', self.direction);
+      Animations.play('idle', self.direction);
     }
 
     if (_isPressed('a') || _isPressed('d')) _machine.dispatch('run');
@@ -69,9 +83,9 @@ const Player = (function({PlayerAnimations}) {
 
   function _run() {
     if (_isClicked('leftClick')) {
-      PlayerAnimations.play('attack_run', self.direction);
+      Animations.play('attack_run', self.direction);
     } else {
-      PlayerAnimations.play('run', self.direction);
+      Animations.play('run', self.direction);
     }
 
     if (_isPressed('space')) _machine.dispatch('jump');
@@ -86,12 +100,12 @@ const Player = (function({PlayerAnimations}) {
 
   function _jump() {
     if (_isClicked('leftClick')) {
-      PlayerAnimations.play('attack_jump', self.direction);
+      Animations.play('attack_jump', self.direction);
     } else {
-      PlayerAnimations.play('jump', self.direction);
+      Animations.play('jump', self.direction);
     }
 
-    self.pos.y -= 1;
+    self.pos.y -= 2;
 
     if (!self.jump) {
       self.jump = true;
@@ -99,25 +113,25 @@ const Player = (function({PlayerAnimations}) {
       setTimeout(() => {
         self.jump = false;
         _machine.dispatch('fall');
-      }, 1000);
+      }, 500);
     }
   }
 
   function _fall() {
     if (_isClicked('leftClick')) {
-      PlayerAnimations.play('attack_jump', self.direction);
+      Animations.play('attack_jump', self.direction);
     } else {
-      PlayerAnimations.play('fall', self.direction);
+      Animations.play('fall', self.direction);
     }
 
-    self.pos.y += 1;
+    self.pos.y += 2;
 
     if (!self.falling) {
       self.falling = true;
       setTimeout(() => {
         self.falling = false;
         self.touchingFloor = true;
-      }, 1000);
+      }, 500);
     }
 
     if (self.touchingFloor) _machine.dispatch('idle');
@@ -127,22 +141,8 @@ const Player = (function({PlayerAnimations}) {
 
   }
 
-  function _setPlayerDirection() {
-    if (_isPressed('a') || _isPressed('d')) {
-      self.direction = (Events.listen('ctrls_key_a').timestamp.keyDown > Events.listen('ctrls_key_d').timestamp.keyDown) ? 'left' : 'right';
-    }
-  }
-
-  function _isPressed(key) {
-    return Events.listen(`ctrls_key_${key}`).active;
-  }
-
-  function _isClicked(btn) {
-    return Events.listen(`ctrls_mouse_${btn}`).active;
-  }
-
   function init() {
-    PlayerAnimations.init();
+    Animations.init();
   }
 
   function update() {
@@ -152,15 +152,15 @@ const Player = (function({PlayerAnimations}) {
   }
 
   function render(ctx) {
-    let currentFrame = PlayerAnimations.getRenderData();
+    let currentFrame = Animations.getRenderData();
     ctx.drawImage(currentFrame.sprite,
-                        currentFrame.data.sX,
-                        currentFrame.data.sY,
-                        currentFrame.data.sWidth,
-                        currentFrame.data.sHeight,
-                        self.pos.x + currentFrame.data.offsetX,
-                        self.pos.y + currentFrame.data.offsetY,
-                        currentFrame.data.sWidth, currentFrame.data.sHeight);
+                  currentFrame.data.sX,
+                  currentFrame.data.sY,
+                  currentFrame.data.sWidth,
+                  currentFrame.data.sHeight,
+                  self.pos.x + currentFrame.data.offsetX,
+                  self.pos.y + currentFrame.data.offsetY,
+                  currentFrame.data.sWidth, currentFrame.data.sHeight);
   }
 
   return {
@@ -169,5 +169,5 @@ const Player = (function({PlayerAnimations}) {
     render
   };
 }({
-  PlayerAnimations: new PlayerAnimations()
+  Animations: new PlayerAnimations()
 }));
