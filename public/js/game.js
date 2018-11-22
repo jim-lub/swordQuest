@@ -1,11 +1,10 @@
 /* jshint esversion: 6 */
-const Game = (function({Events, Ctrls}) {
-  const pos = {x: 50, y: 50};
+const Game = (function({Ctrls}) {
 
   const _loop = {
     now: null,
     dt: 0,
-    last: _timestamp(),
+    last: null,
     step: 1/60,
     loop() {
       this.now = _timestamp();
@@ -25,18 +24,17 @@ const Game = (function({Events, Ctrls}) {
 
   function _update(step) {
     Ctrls.emit();
+
+    Player.update();
   }
 
   function _render(dt) {
     const ctx = document.getElementById('canvas').getContext('2d');
-    let image = Assets.img('player', 'animation_attack_left');
     ctx.clearRect(0, 0, 1280, 640);
-    ctx.drawImage(image, 180, 0, 90, 70, 150, 150, 90, 70);
-    ctx.fillRect(50, 50, 50, 50);
+    Player.render(ctx);
   }
 
   function init() {
-
     window.requestAnimationFrame(_loop.loop.bind(_loop));
   }
 
@@ -47,17 +45,4 @@ const Game = (function({Events, Ctrls}) {
   return {
     init
   };
-}({
-  Events,
-  Ctrls: new Controls()
-}));
-
-$(document).ready(function(){
-
-  Load.images()
-  .then(() => {
-    Game.init();
-  })
-  .catch(e => console.log(e));
-
-});
+}({Ctrls: new Controls()}));
