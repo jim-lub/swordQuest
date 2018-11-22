@@ -25,6 +25,12 @@ class Level {
     this.setImageAtlasDark(this.imageAtlas.dark64x64, 64);
   }
 
+  update() {
+    Events.emit('world_static_tiles', this.static_tiles);
+
+    this.resetCollisionArray();
+  }
+
   resetCollisionArray() {
     this.static_tiles = [];
   }

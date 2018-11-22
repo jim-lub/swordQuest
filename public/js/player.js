@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-const Player = (function({Animations}) {
+const Player = (function({Animations, Collision}) {
   const self = {
     pos: {
       x: 150,
@@ -9,6 +9,24 @@ const Player = (function({Animations}) {
     motion: {
       hor: 0,
       ver: 0
+    },
+    hitbox: {
+      offsetX: 12,
+      offsetY: 35,
+      width: 32,
+      height: 35
+    },
+    DEFAULTS: {
+      width: 90,
+      height: 70,
+      run: {
+        acceleration: 0.4,
+        max: 3.5
+      },
+      jump: { acceleration: 3 },
+      fall: { acceleration: 2 },
+      friction: 0.97,
+      epsilon: 0.3
     },
     jump: false,
     falling: false,
@@ -91,10 +109,10 @@ const Player = (function({Animations}) {
     if (_isPressed('space')) _machine.dispatch('jump');
 
     if (_isPressed('a') || _isPressed('d')) {
-      if (self.direction === 'right') self.pos.x += 2;
-      if (self.direction === 'left') self.pos.x -= 2;
+      if (self.direction === 'right') self.motion.hor += self.DEFAULTS.run.acceleration * self.DEFAULTS.friction;
+      if (self.direction === 'left') self.motion.hor -= self.DEFAULTS.run.acceleration * self.DEFAULTS.friction;
     } else {
-      _machine.dispatch('idle');
+      if (self.motion.hor === 0) _machine.dispatch('idle');
     }
   }
 
@@ -149,9 +167,27 @@ const Player = (function({Animations}) {
     _setPlayerDirection();
 
     _machine.transitions[_machine.state].active();
+
+    self.motion.hor *= self.DEFAULTS.friction * self.DEFAULTS.friction;
+
+    if (Math.abs(self.motion.hor) < self.DEFAULTS.epsilon) self.motion.hor = 0;
+    if (Math.abs(self.motion.ver) < self.DEFAULTS.epsilon) self.motion.ver = 0;
+
+    Collision.listen({
+      player: {
+        pos: self.pos, motion: self.motion, hitbox: self.hitbox, size: {width: self.DEFAULTS.width, height: self.DEFAULTS.height}
+      },
+      static_tiles: Events.listen('world_static_tiles')
+    });
+
+    if (!Collision.hit('x')) self.pos.x = Math.round(self.pos.x + self.motion.hor);
+    if (!Collision.hit('y')) self.pos.y = Math.round(self.pos.y + self.motion.ver);
   }
 
   function render(ctx) {
+    Collision.drawHitBox(ctx);
+    Collision.drawCollisionPoints(ctx);
+
     let currentFrame = Animations.getRenderData();
     ctx.drawImage(currentFrame.sprite,
                   currentFrame.data.sX,
@@ -169,5 +205,6 @@ const Player = (function({Animations}) {
     render
   };
 }({
-  Animations: new PlayerAnimations()
+  Animations: new PlayerAnimations(),
+  Collision: new CollisionDetection()
 }));

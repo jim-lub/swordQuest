@@ -17,7 +17,6 @@ const Events = (function() {
 
   return {
     emit,
-    listen,
-    events
+    listen
   };
 }());

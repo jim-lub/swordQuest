@@ -24,6 +24,7 @@ const Game = (function({Ctrls, World}) {
 
   function _update(step) {
     Ctrls.emit();
+    World.update();
 
     Player.update();
   }
