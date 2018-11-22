@@ -14,7 +14,7 @@ let io = socketIO(server);
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
-  console.log('Client connected');
+  console.log('Player connected');
 });
 
 server.listen(port, () => {

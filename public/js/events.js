@@ -2,7 +2,7 @@
 const Events = (function() {
 
   const publish = () => {
-
+    console.log('publish');
   };
 
   const subscribe = () => {
@@ -14,6 +14,6 @@ const Events = (function() {
   };
 
   return {
-
+    publish
   };
 })();
