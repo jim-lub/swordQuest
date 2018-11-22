@@ -126,14 +126,6 @@ class Controls {
     });
   }
 
-  isPressed(key) {
-    return (this.KEY[key].active) ? true : false;
-  }
-
-  isClicked(btn) {
-    return (this.MOUSE[key].active) ? true : false;
-  }
-
   emit() {
     Events.emit('ctrls_key_w', {active: this.KEY.w.active, timestamp: this.KEY.w.timestamp});
     Events.emit('ctrls_key_a', {active: this.KEY.a.active, timestamp: this.KEY.a.timestamp});

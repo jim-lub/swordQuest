@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-const Player = (function() {
+const Player = (function({PlayerAnimations}) {
   const self = {
     pos: {
       x: 150,
@@ -57,16 +57,26 @@ const Player = (function() {
   };
 
   function _idle() {
-    console.log('idle ');
-    if (Events.listen('ctrls_key_a').active || Events.listen('ctrls_key_d').active) _machine.dispatch('run');
-    if (Events.listen('ctrls_key_space').active) _machine.dispatch('jump');
+    if (_isClicked('leftClick')) {
+      PlayerAnimations.play('attack', self.direction);
+    } else {
+      PlayerAnimations.play('idle', self.direction);
+    }
+
+    if (_isPressed('a') || _isPressed('d')) _machine.dispatch('run');
+    if (_isPressed('space')) _machine.dispatch('jump');
   }
 
   function _run() {
-    console.log('running ' + self.direction);
-    if (Events.listen('ctrls_key_space').active) _machine.dispatch('jump');
+    if (_isClicked('leftClick')) {
+      PlayerAnimations.play('attack_run', self.direction);
+    } else {
+      PlayerAnimations.play('run', self.direction);
+    }
 
-    if (Events.listen('ctrls_key_a').active || Events.listen('ctrls_key_d').active) {
+    if (_isPressed('space')) _machine.dispatch('jump');
+
+    if (_isPressed('a') || _isPressed('d')) {
       if (self.direction === 'right') self.pos.x += 2;
       if (self.direction === 'left') self.pos.x -= 2;
     } else {
@@ -75,7 +85,11 @@ const Player = (function() {
   }
 
   function _jump() {
-    console.log('jumping');
+    if (_isClicked('leftClick')) {
+      PlayerAnimations.play('attack_jump', self.direction);
+    } else {
+      PlayerAnimations.play('jump', self.direction);
+    }
 
     self.pos.y -= 1;
 
@@ -90,7 +104,11 @@ const Player = (function() {
   }
 
   function _fall() {
-    console.log('falling ');
+    if (_isClicked('leftClick')) {
+      PlayerAnimations.play('attack_jump', self.direction);
+    } else {
+      PlayerAnimations.play('fall', self.direction);
+    }
 
     self.pos.y += 1;
 
@@ -105,10 +123,26 @@ const Player = (function() {
     if (self.touchingFloor) _machine.dispatch('idle');
   }
 
+  function _attack() {
+
+  }
+
   function _setPlayerDirection() {
-    if (Events.listen('ctrls_key_a').active || Events.listen('ctrls_key_d').active) {
+    if (_isPressed('a') || _isPressed('d')) {
       self.direction = (Events.listen('ctrls_key_a').timestamp.keyDown > Events.listen('ctrls_key_d').timestamp.keyDown) ? 'left' : 'right';
     }
+  }
+
+  function _isPressed(key) {
+    return Events.listen(`ctrls_key_${key}`).active;
+  }
+
+  function _isClicked(btn) {
+    return Events.listen(`ctrls_mouse_${btn}`).active;
+  }
+
+  function init() {
+    PlayerAnimations.init();
   }
 
   function update() {
@@ -118,12 +152,22 @@ const Player = (function() {
   }
 
   function render(ctx) {
-    let image = Assets.img('player', `animation_attack_${self.direction}`);
-    ctx.drawImage(image, 180, 0, 90, 70, self.pos.x, self.pos.y, 90, 70);
+    let currentFrame = PlayerAnimations.getRenderData();
+    ctx.drawImage(currentFrame.sprite,
+                        currentFrame.data.sX,
+                        currentFrame.data.sY,
+                        currentFrame.data.sWidth,
+                        currentFrame.data.sHeight,
+                        self.pos.x + currentFrame.data.offsetX,
+                        self.pos.y + currentFrame.data.offsetY,
+                        currentFrame.data.sWidth, currentFrame.data.sHeight);
   }
 
   return {
+    init,
     update,
     render
   };
-}());
+}({
+  PlayerAnimations: new PlayerAnimations()
+}));

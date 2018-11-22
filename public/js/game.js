@@ -35,6 +35,7 @@ const Game = (function({Ctrls}) {
   }
 
   function init() {
+    Player.init();
     window.requestAnimationFrame(_loop.loop.bind(_loop));
   }
 
@@ -45,4 +46,6 @@ const Game = (function({Ctrls}) {
   return {
     init
   };
-}({Ctrls: new Controls()}));
+}({
+  Ctrls: new Controls(),
+}));
