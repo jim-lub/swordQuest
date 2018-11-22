@@ -1,16 +1,13 @@
 /* jshint esversion: 6 */
-const Game = (function({Events}) {
-
-  const _timestamp = function() {
-    return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
-  };
+const Game = (function({Events, Ctrls}) {
+  const pos = {x: 50, y: 50};
 
   const _loop = {
     now: null,
     dt: 0,
     last: _timestamp(),
     step: 1/60,
-    _loop() {
+    loop() {
       this.now = _timestamp();
       this.dt = this.dt + Math.min(1, (this.now - this.last) / 1000);
 
@@ -22,28 +19,45 @@ const Game = (function({Events}) {
       _render(this.dt);
 
       this.last = this.now;
-      window.requestAnimationFrame(this._loop.bind(this));
+      window.requestAnimationFrame(this.loop.bind(this));
     }
   };
 
-  const _update = function(step) {
-  };
+  function _update(step) {
+    Ctrls.emit();
+  }
 
-  const _render = function(dt) {
+  function _render(dt) {
     const ctx = document.getElementById('canvas').getContext('2d');
-
+    let image = Assets.img('player', 'animation_attack_left');
     ctx.clearRect(0, 0, 1280, 640);
-    ctx.fillText(dt, 10, 10);
+    ctx.drawImage(image, 180, 0, 90, 70, 150, 150, 90, 70);
     ctx.fillRect(50, 50, 50, 50);
-  };
+  }
 
-  const init = function() {
-    window.requestAnimationFrame(_loop._loop.bind(_loop));
-  };
+  function init() {
+
+    window.requestAnimationFrame(_loop.loop.bind(_loop));
+  }
+
+  function _timestamp() {
+    return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
+  }
 
   return {
     init
   };
-})({Events});
+}({
+  Events,
+  Ctrls: new Controls()
+}));
 
-Game.init();
+$(document).ready(function(){
+
+  Load.images()
+  .then(() => {
+    Game.init();
+  })
+  .catch(e => console.log(e));
+
+});

@@ -1,0 +1,22 @@
+{"player": {
+    "folder": "assets/img/player/",
+    "images": {
+      "animation_idle_left": "idle-l.png",
+      "animation_idle_right": "idle-r.png",
+      "animation_run_left": "run-l.png",
+      "animation_run_right": "run-r.png",
+      "animation_jump_left": "jump-l.png",
+      "animation_jump_right": "jump-r.png",
+      "animation_fall_left": "fall-l.png",
+      "animation_fall_right": "fall-r.png",
+      "animation_slide_left": "slide-l.png",
+      "animation_slide_right": "slide-r.png",
+      "animation_attack_left": "attack-l.png",
+      "animation_attack_right": "attack-r.png",
+      "animation_attack_run_left": "attack-run-l.png",
+      "animation_attack_run_right": "attack-run-r.png",
+      "animation_attack_jump_left": "attack-jump-l.png",
+      "animation_attack_jump_right": "attack-jump-r.png"
+    }
+  }
+}

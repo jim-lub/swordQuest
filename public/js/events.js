@@ -1,19 +1,23 @@
 /* jshint esversion: 6 */
 const Events = (function() {
 
-  const publish = () => {
-    console.log('publish');
-  };
+  const events = {};
 
-  const subscribe = () => {
+  function emit(eventID, data) {
+    events[eventID] = data;
+  }
 
-  };
-
-  const unsubscribe = () => {
-
-  };
+  function listen(eventID) {
+    if (!events[eventID]) {
+      return null;
+    } else {
+      return events[eventID];
+    }
+  }
 
   return {
-    publish
+    emit,
+    listen,
+    events
   };
-})();
+}());
