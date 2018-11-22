@@ -8,67 +8,64 @@ class CollisionDetection {
   }
 
   hit(axis) {
-    return (this[axis] === true) ? true : false;
-  }
-
-  distanceFromFloor(y) {
-    if (this.collided.length > 0) {
-      return this.collided[0].y - y;
-    } else {
-      return false;
-    }
+    return this[axis];
   }
 
   listen({player, static_tiles}) {
-    this.collided = [];
-
     this.set_update({player});
-    this.x = (this.get_update({player, hitbox: this.hitbox, static_tiles}, 'x')) ? true : false;
-    this.y = (this.get_update({player, hitbox: this.hitbox, static_tiles}, 'y')) ? true : false;
+
+    let  filteredTiles = this.filter(static_tiles, (player.pos.x - 150), (player.pos.x + 150), (player.pos.y - 150), (player.pos.y + 150));
+
+    this.floor = (this.get_update({player, hitbox: this.hitbox, static_tiles: filteredTiles}, 'floor')) ? true : false;
+    this.x = (this.get_update({player, hitbox: this.hitbox, static_tiles: filteredTiles}, 'x')) ? true : false;
+    this.y = (this.get_update({player, hitbox: this.hitbox, static_tiles: filteredTiles}, 'y')) ? true : false;
+  }
+
+  /*******************************************
+  * FILTER TILES
+  *******************************************/
+  filter(tiles, x1, x2, y1, y2) {
+    let array = [];
+    for (let i = 0; i < tiles.length; i++) {
+      if (tiles[i].x > x1 && tiles[i].x < x2 && tiles[i].y > y1 && tiles[i].y < y2) array.push(tiles[i]);
+    }
+    return array;
   }
 
   /*******************************************
   * CHECK FOR COLLISIONS
   *******************************************/
   get_update({player, hitbox, static_tiles}, axis) {
-    let isColliding = [];
-
-    static_tiles.forEach(tile => {
-      if (this.get_boxCollision({player, hitbox, tile}, axis)) isColliding.push(true);
-    });
-
-    return (isColliding.length > 0) ? true : false;
+    for (let i = 0; i < static_tiles.length; i++) {
+      if (this.get_boxCollision({player, hitbox, tile: static_tiles[i]}, axis)) {
+        return true;
+      }
+    }
   }
 
   get_boxCollision({player, hitbox, tile}, axis) {
-    let isColliding = false;
-
     for (let i = 0; i < hitbox.collisionPoints.length; i++) {
       if (this.get_pointCollision({player, point: hitbox.collisionPoints[i], tile}, axis)) {
-        this.collided.push(hitbox.collisionPoints[i]);
-        isColliding = true;
-        break;
+        return true;
       }
     }
-
-    return (isColliding) ? true : false;
   }
 
   get_pointCollision({player, point, tile}, axis) {
     let verticalMotion = player.motion.ver;
     let horizontalMotion = player.motion.hor;
     if (axis === 'floor') {
-      verticalMotion = 0.5;
+      verticalMotion = 1;
       horizontalMotion = 0;
     } else {
       if (axis === 'x') verticalMotion = 0;
       if (axis === 'y') horizontalMotion = 0;
     }
 
-    let collisionX = point.x + Math.round(horizontalMotion) >= tile.x && point.x + Math.round(horizontalMotion) <= tile.x + tile.width;
-    let collisionY = point.y + Math.round(verticalMotion) >= tile.y && point.y + Math.round(verticalMotion) <= tile.y + tile.height;
+    let collisionX = point.x + horizontalMotion >= tile.x && point.x + horizontalMotion <= tile.x + tile.width;
+    let collisionY = point.y + verticalMotion >= tile.y && point.y + verticalMotion <= tile.y + tile.height;
 
-    return (collisionX && collisionY) ? true : false;
+    return (collisionX && collisionY);
   }
 
   /*******************************************
@@ -81,10 +78,10 @@ class CollisionDetection {
       w: player.hitbox.width,
       h: player.hitbox.height,
       p: {
-        left: 4,
-        top: 4,
-        right: 4,
-        bottom: 4
+        left: 1,
+        top: 1,
+        right: 1,
+        bottom: 1
       }
     };
 

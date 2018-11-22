@@ -36,8 +36,8 @@ const Game = (function({Ctrls, World}) {
     World.renderBackground(ctx);
     World.render('block_01', 4, ctx, 0, 0);
     World.render('block_01', 5, ctx, 0, 0);
-    World.render('block_02', 4, ctx, 640, 0);
-    World.render('block_02', 5, ctx, 640, 0);
+    // World.render('block_02', 4, ctx, 640, 0);
+    // World.render('block_02', 5, ctx, 640, 0);
 
     Player.render(ctx);
   }

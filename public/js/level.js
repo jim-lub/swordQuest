@@ -15,6 +15,7 @@ class Level {
       dark64x64: new Map()
     };
     this.static_tiles = [];
+    this.emitted = false;
   }
 
   init() {

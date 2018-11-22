@@ -20,13 +20,13 @@ const Player = (function({Animations, Collision}) {
       width: 90,
       height: 70,
       run: {
-        acceleration: 0.4,
-        max: 3.5
+        acceleration: 0.35,
+        max: 4
       },
       jump: { acceleration: 3 },
-      fall: { acceleration: 2 },
+      fall: { acceleration: 0.25 },
       friction: 0.97,
-      epsilon: 0.3
+      epsilon: 0.1
     },
     jump: false,
     falling: false,
@@ -45,6 +45,15 @@ const Player = (function({Animations, Collision}) {
 
   function _isClicked(btn) {
     return Events.listen(`ctrls_mouse_${btn}`).active;
+  }
+
+  function _limitHorizontalSpeed() {
+    self.motion.hor *= self.DEFAULTS.friction * self.DEFAULTS.friction;
+
+    if (Math.abs(self.motion.hor) > self.DEFAULTS.run.max) {
+      if (self.direction === 'left') self.motion.hor = -self.DEFAULTS.run.max;
+      if (self.direction === 'right') self.motion.hor = self.DEFAULTS.run.max;
+    }
   }
 
   const _machine = {
@@ -67,12 +76,14 @@ const Player = (function({Animations, Collision}) {
         active() { _idle(); },
         run() { this.changeStateTo('run'); },
         jump() { this.changeStateTo('jump'); },
+        fall() { this.changeStateTo('fall'); },
         attack() {}
       },
       'run': {
         active() { _run(); },
         idle() { this.changeStateTo('idle'); },
         jump() { this.changeStateTo('jump'); },
+        fall() { this.changeStateTo('fall'); },
         attack() {}
       },
       'jump': {
@@ -123,15 +134,10 @@ const Player = (function({Animations, Collision}) {
       Animations.play('jump', self.direction);
     }
 
-    self.pos.y -= 2;
-
-    if (!self.jump) {
-      self.jump = true;
-      self.touchingFloor = false;
-      setTimeout(() => {
-        self.jump = false;
-        _machine.dispatch('fall');
-      }, 500);
+    if (Collision.hit('floor')) {
+      self.motion.ver -= self.DEFAULTS.jump.acceleration;
+    } else {
+      _machine.dispatch('idle');
     }
   }
 
@@ -141,18 +147,11 @@ const Player = (function({Animations, Collision}) {
     } else {
       Animations.play('fall', self.direction);
     }
-
-    self.pos.y += 2;
-
-    if (!self.falling) {
-      self.falling = true;
-      setTimeout(() => {
-        self.falling = false;
-        self.touchingFloor = true;
-      }, 500);
+    if (!Collision.hit('floor')) {
+      self.motion.ver += self.DEFAULTS.fall.acceleration;
+    } else {
+      _machine.dispatch('idle');
     }
-
-    if (self.touchingFloor) _machine.dispatch('idle');
   }
 
   function _attack() {
@@ -168,11 +167,6 @@ const Player = (function({Animations, Collision}) {
 
     _machine.transitions[_machine.state].active();
 
-    self.motion.hor *= self.DEFAULTS.friction * self.DEFAULTS.friction;
-
-    if (Math.abs(self.motion.hor) < self.DEFAULTS.epsilon) self.motion.hor = 0;
-    if (Math.abs(self.motion.ver) < self.DEFAULTS.epsilon) self.motion.ver = 0;
-
     Collision.listen({
       player: {
         pos: self.pos, motion: self.motion, hitbox: self.hitbox, size: {width: self.DEFAULTS.width, height: self.DEFAULTS.height}
@@ -180,8 +174,18 @@ const Player = (function({Animations, Collision}) {
       static_tiles: Events.listen('world_static_tiles')
     });
 
-    if (!Collision.hit('x')) self.pos.x = Math.round(self.pos.x + self.motion.hor);
-    if (!Collision.hit('y')) self.pos.y = Math.round(self.pos.y + self.motion.ver);
+    if (!Collision.hit('floor') && _machine.state !== 'fall') _machine.dispatch('fall');
+
+    _limitHorizontalSpeed();
+
+    if (Math.abs(self.motion.hor) < self.DEFAULTS.epsilon) self.motion.hor = 0;
+    if (Math.abs(self.motion.ver) < self.DEFAULTS.epsilon) self.motion.ver = 0;
+
+    if (Collision.hit('x')) self.motion.hor = 0;
+    if (Collision.hit('y')) self.motion.ver = 0;
+
+    if (!Collision.hit('x')) self.pos.x += self.motion.hor;
+    if (!Collision.hit('y')) self.pos.y += self.motion.ver;
   }
 
   function render(ctx) {
@@ -194,8 +198,8 @@ const Player = (function({Animations, Collision}) {
                   currentFrame.data.sY,
                   currentFrame.data.sWidth,
                   currentFrame.data.sHeight,
-                  self.pos.x + currentFrame.data.offsetX,
-                  self.pos.y + currentFrame.data.offsetY,
+                  Math.round(self.pos.x + currentFrame.data.offsetX),
+                  Math.round(self.pos.y + currentFrame.data.offsetY),
                   currentFrame.data.sWidth, currentFrame.data.sHeight);
   }
 
