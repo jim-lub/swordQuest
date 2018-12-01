@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-const Player = (function({Animations, Collision}) {
+const Player = (function() {
   const self = {
     pos: {
       x: 150,
@@ -32,6 +32,10 @@ const Player = (function({Animations, Collision}) {
     falling: false,
     touchingFloor: true
   };
+
+  const Animations = new PlayerAnimations();
+  const Self = new Entity({x: self.pos.x, y: self.pos.y, width: self.DEFAULTS.width, height: self.DEFAULTS.height, mass: 100});
+  const Collision = entity.collision;
 
   function _setPlayerDirection() {
     if (_isPressed('a') || _isPressed('d')) {
@@ -134,7 +138,7 @@ const Player = (function({Animations, Collision}) {
       Animations.play('jump', self.direction);
     }
 
-    if (Collision.hit('floor')) {
+    if (Collision.hit('y')) {
       self.motion.ver -= self.DEFAULTS.jump.acceleration;
     } else {
       _machine.dispatch('idle');
@@ -147,7 +151,7 @@ const Player = (function({Animations, Collision}) {
     } else {
       Animations.play('fall', self.direction);
     }
-    if (!Collision.hit('floor')) {
+    if (!Collision.hit('y')) {
       self.motion.ver += self.DEFAULTS.fall.acceleration;
     } else {
       _machine.dispatch('idle');
@@ -162,35 +166,39 @@ const Player = (function({Animations, Collision}) {
     Animations.init();
   }
 
-  function update() {
+  function update(entity, dt) {
+    // Collision.set({
+    //   player: {
+    //     pos: self.pos, motion: self.motion, hitbox: self.hitbox, size: {width: self.DEFAULTS.width, height: self.DEFAULTS.height}
+    //   }
+    // });
+    //
+    // Collision.listen({
+    //   player: {
+    //     pos: self.pos, motion: self.motion, hitbox: self.hitbox, size: {width: self.DEFAULTS.width, height: self.DEFAULTS.height}
+    //   },
+    //   static_tiles: Events.listen('world_static_tiles')
+    // });
+
     _setPlayerDirection();
 
     _machine.transitions[_machine.state].active();
-
-    Collision.listen({
-      player: {
-        pos: self.pos, motion: self.motion, hitbox: self.hitbox, size: {width: self.DEFAULTS.width, height: self.DEFAULTS.height}
-      },
-      static_tiles: Events.listen('world_static_tiles')
-    });
-
-    if (!Collision.hit('floor') && _machine.state !== 'fall') _machine.dispatch('fall');
 
     _limitHorizontalSpeed();
 
     if (Math.abs(self.motion.hor) < self.DEFAULTS.epsilon) self.motion.hor = 0;
     if (Math.abs(self.motion.ver) < self.DEFAULTS.epsilon) self.motion.ver = 0;
 
+    if (!Collision.hit('y') && _machine.state !== 'fall') _machine.dispatch('fall');
+
     if (Collision.hit('x')) self.motion.hor = 0;
-    if (Collision.hit('y')) self.motion.ver = 0;
+    if (Collision.hit('y') || Collision.hit('y')) self.motion.ver = 0;
 
     if (!Collision.hit('x')) self.pos.x += self.motion.hor;
     if (!Collision.hit('y')) self.pos.y += self.motion.ver;
   }
 
   function render(ctx) {
-    Collision.drawHitBox(ctx);
-    Collision.drawCollisionPoints(ctx);
 
     let currentFrame = Animations.getRenderData();
     ctx.drawImage(currentFrame.sprite,
@@ -208,7 +216,4 @@ const Player = (function({Animations, Collision}) {
     update,
     render
   };
-}({
-  Animations: new PlayerAnimations(),
-  Collision: new CollisionDetection()
-}));
+}());

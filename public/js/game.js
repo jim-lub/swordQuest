@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-const Game = (function({Ctrls, World}) {
+const Game = (function({Ctrls, World, Engine}) {
 
   const _loop = {
     now: null,
@@ -25,8 +25,7 @@ const Game = (function({Ctrls, World}) {
   function _update(step) {
     Ctrls.emit();
     World.update();
-
-    Player.update();
+    Player.update(Engine.entities[0], step);
   }
 
   function _render(dt) {
@@ -36,14 +35,14 @@ const Game = (function({Ctrls, World}) {
     World.renderBackground(ctx);
     World.render('block_01', 4, ctx, 0, 0);
     World.render('block_01', 5, ctx, 0, 0);
-    // World.render('block_02', 4, ctx, 640, 0);
-    // World.render('block_02', 5, ctx, 640, 0);
+    World.render('block_02', 4, ctx, 640, 0);
+    World.render('block_02', 5, ctx, 640, 0);
 
     Player.render(ctx);
   }
 
   function init() {
-    Player.init();
+    Player.init(Engine);
     World.init();
     window.requestAnimationFrame(_loop.loop.bind(_loop));
   }
@@ -58,4 +57,5 @@ const Game = (function({Ctrls, World}) {
 }({
   Ctrls: new Controls(),
   World: new Level(),
+  Engine: new Engine()
 }));
