@@ -2,7 +2,8 @@
 const Assets = (function() {
 
   const images = {
-    player: {}
+    player: {},
+    forest: {}
   };
 
   function push(type, name, img) {
@@ -10,7 +11,7 @@ const Assets = (function() {
   }
 
   function img(type, id) {
-    return images.player[id];
+    return images[type][id];
   }
 
   return {

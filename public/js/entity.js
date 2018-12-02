@@ -90,7 +90,10 @@ class Entity {
     if (this.collision.hit('y')) this.velocity.set(this.velocity.x, 0);
     if (this.collision.hit('x')) this.velocity.set(0, this.velocity.y);
 
-    this.pos.add(this.velocity.multiply(dt));
+    this.velocity.multiply(dt);
+
+    this.pos.add(this.velocity);
+    if (Events.listen('PLAYER_HIT_LEFT_WALL') || Events.listen('PLAYER_HIT_RIGHT_WALL')) this.pos.set((this.pos.x - this.velocity.x), this.pos.y);
 
     this.acceleration.multiply(0);
   }

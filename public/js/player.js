@@ -5,7 +5,7 @@ const Player = (function() {
   };
 
   const DEFAULTS = {
-    pos: {x: 150, y: 250},
+    pos: {x: 350, y: 250},
     width: 90,
     height: 70,
     mass: 100
@@ -93,8 +93,8 @@ const Player = (function() {
     if (Ctrls.isPressed('space')) _machine.dispatch('jump');
 
     if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
-      if (self.direction === 'left') Self.apply(new Vector(-10000, 0));
-      if (self.direction === 'right') Self.apply(new Vector(10000, 0));
+      if (self.direction === 'left') Self.apply(new Vector(-15000, 0));
+      if (self.direction === 'right') Self.apply(new Vector(15000, 0));
     } else {
       if (Self.velocity.x === 0) _machine.dispatch('idle');
     }
@@ -122,8 +122,8 @@ const Player = (function() {
     }
     if (!Collision.hit('y')) {
       if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
-        if (self.direction === 'left') Self.apply(new Vector(-5000, 0));
-        if (self.direction === 'right') Self.apply(new Vector(5000, 0));
+        if (self.direction === 'left') Self.apply(new Vector(-10000, 0));
+        if (self.direction === 'right') Self.apply(new Vector(10000, 0));
       }
     } else {
       _machine.dispatch('idle');
@@ -140,6 +140,24 @@ const Player = (function() {
     }
   }
 
+  function getPosition() {
+    return {
+      x: Self.pos.x,
+      y: Self.pos.y
+    };
+  }
+
+  function getVelocity() {
+    return {
+      x: Self.velocity.x,
+      y: Self.velocity.y
+    };
+  }
+
+  function getDirection() {
+    return self.direction;
+  }
+
   function update(dt) {
     _setPlayerDirection();
 
@@ -152,8 +170,8 @@ const Player = (function() {
 
   function render(ctx) {
     let currentFrame = Animations.getCurrentFrame();
-    ctx.fillStyle = 'green';
-    ctx.fillRect(Self.pos.x, Self.pos.y, Self.width, Self.height);
+    // ctx.fillStyle = 'green';
+    // ctx.fillRect(Self.pos.x, Self.pos.y, Self.width, Self.height);
     ctx.drawImage(currentFrame.sprite,
                   currentFrame.data.sX,
                   currentFrame.data.sY,
@@ -169,6 +187,9 @@ const Player = (function() {
   }
 
   return {
+    getPosition,
+    getVelocity,
+    getDirection,
     update,
     render,
     init
