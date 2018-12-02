@@ -39,7 +39,9 @@ const Load = (function() {
 
   function images() {
     return new Promise((resolve, reject) => {
-      let promises = [_load('sprites.json', 'player')];
+      let promises = [];
+      promises.push(_load('sprites.json', 'player'));
+      promises.push(_load('backgrounds.json', 'forest'));
 
       Promise.all(promises)
       .then(() => resolve())

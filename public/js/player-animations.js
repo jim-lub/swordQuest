@@ -104,7 +104,7 @@ class PlayerAnimations {
     });
   }
 
-  getRenderData() {
+  getCurrentFrame() {
     return {
       sprite: this.currentSprite,
       data: this.currentData
