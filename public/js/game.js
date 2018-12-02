@@ -1,5 +1,6 @@
 /* jshint esversion: 6 */
 const Game = (function({Ctrls, World, Engine}) {
+  const LEVEL = [];
 
   const _loop = {
     now: null,
@@ -22,28 +23,33 @@ const Game = (function({Ctrls, World, Engine}) {
     }
   };
 
-  function _update(step) {
-    Ctrls.emit();
-    World.update();
-    Player.update(Engine.entities[0], step);
+  function _update(dt) {
+    Player.update(dt);
+    Events.emit('tiles', LEVEL);
   }
 
   function _render(dt) {
     const ctx = document.getElementById('canvas').getContext('2d');
     ctx.clearRect(0, 0, 1280, 640);
 
-    World.renderBackground(ctx);
-    World.render('block_01', 4, ctx, 0, 0);
-    World.render('block_01', 5, ctx, 0, 0);
-    World.render('block_02', 4, ctx, 640, 0);
-    World.render('block_02', 5, ctx, 640, 0);
+    ctx.fillStyle = 'grey';
+    LEVEL.forEach(cur => {
+      ctx.fillRect(cur.x, cur.y, cur.width, cur.height);
+    });
 
     Player.render(ctx);
   }
 
   function init() {
-    Player.init(Engine);
-    World.init();
+    LEVEL.push(new Tile({x: 150, y: 468, width: 32, height: 32}));
+    LEVEL.push(new Tile({x: 182, y: 436, width: 32, height: 32}));
+    let spacingX = 0;
+    for (let i = 0; i < 20; i++) {
+      LEVEL.push(new Tile({x: spacingX, y: 500, width: 32, height: 32}));
+      spacingX += 32;
+    }
+    Events.emit('tiles', LEVEL);
+    Player.init();
     window.requestAnimationFrame(_loop.loop.bind(_loop));
   }
 
@@ -55,7 +61,5 @@ const Game = (function({Ctrls, World, Engine}) {
     init
   };
 }({
-  Ctrls: new Controls(),
-  World: new Level(),
-  Engine: new Engine()
+  Ctrls: new Controls()
 }));

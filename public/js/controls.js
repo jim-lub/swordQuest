@@ -126,12 +126,19 @@ class Controls {
     });
   }
 
-  emit() {
-    Events.emit('ctrls_key_w', {active: this.KEY.w.active, timestamp: this.KEY.w.timestamp});
-    Events.emit('ctrls_key_a', {active: this.KEY.a.active, timestamp: this.KEY.a.timestamp});
-    Events.emit('ctrls_key_s', {active: this.KEY.s.active, timestamp: this.KEY.s.timestamp});
-    Events.emit('ctrls_key_d', {active: this.KEY.d.active, timestamp: this.KEY.d.timestamp});
-    Events.emit('ctrls_key_space', {active: this.KEY.space.active, timestamp: this.KEY.space.timestamp});
-    Events.emit('ctrls_mouse_leftClick', {active: this.MOUSE.leftClick.active, timestamp: this.MOUSE.leftClick.timestamp});
+  isPressed(key) {
+    if (this.KEY[key].active) return true;
+  }
+
+  isClicked(btn) {
+    if (this.MOUSE[btn].active) return true;
+  }
+
+  isReleased(btn) {
+    if (!this.MOUSE[btn].active) return true;
+  }
+
+  lastKeyPressed(a, b) {
+    if (this.KEY[a].timestamp.keyDown > this.KEY[b].timestamp.keyDown) return true;
   }
 }

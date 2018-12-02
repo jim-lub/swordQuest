@@ -1,64 +1,33 @@
 /* jshint esversion: 6 */
 const Player = (function() {
   const self = {
-    pos: {
-      x: 150,
-      y: 150
-    },
-    direction: 'right',
-    motion: {
-      hor: 0,
-      ver: 0
-    },
-    hitbox: {
-      offsetX: 12,
-      offsetY: 35,
-      width: 32,
-      height: 35
-    },
-    DEFAULTS: {
-      width: 90,
-      height: 70,
-      run: {
-        acceleration: 0.35,
-        max: 4
-      },
-      jump: { acceleration: 3 },
-      fall: { acceleration: 0.25 },
-      friction: 0.97,
-      epsilon: 0.1
-    },
-    jump: false,
-    falling: false,
-    touchingFloor: true
+    direction: 'right'
   };
 
+  const DEFAULTS = {
+    pos: {x: 150, y: 250},
+    width: 90,
+    height: 70,
+    mass: 100
+  };
+
+  const HITBOX = {
+    offsetX: 12,
+    offsetY: 35,
+    width: 32,
+    height: 35
+  };
+
+  const Self = new Entity({
+    x: DEFAULTS.pos.x,
+    y: DEFAULTS.pos.y,
+    width: HITBOX.width,
+    height: HITBOX.height,
+    mass: DEFAULTS.mass
+  });
+  const Collision = Self.collision;
+  const Ctrls = new Controls();
   const Animations = new PlayerAnimations();
-  const Self = new Entity({x: self.pos.x, y: self.pos.y, width: self.DEFAULTS.width, height: self.DEFAULTS.height, mass: 100});
-  const Collision = entity.collision;
-
-  function _setPlayerDirection() {
-    if (_isPressed('a') || _isPressed('d')) {
-      self.direction = (Events.listen('ctrls_key_a').timestamp.keyDown > Events.listen('ctrls_key_d').timestamp.keyDown) ? 'left' : 'right';
-    }
-  }
-
-  function _isPressed(key) {
-    return Events.listen(`ctrls_key_${key}`).active;
-  }
-
-  function _isClicked(btn) {
-    return Events.listen(`ctrls_mouse_${btn}`).active;
-  }
-
-  function _limitHorizontalSpeed() {
-    self.motion.hor *= self.DEFAULTS.friction * self.DEFAULTS.friction;
-
-    if (Math.abs(self.motion.hor) > self.DEFAULTS.run.max) {
-      if (self.direction === 'left') self.motion.hor = -self.DEFAULTS.run.max;
-      if (self.direction === 'right') self.motion.hor = self.DEFAULTS.run.max;
-    }
-  }
 
   const _machine = {
     dispatch(actionName, ...data) {
@@ -104,55 +73,58 @@ const Player = (function() {
   };
 
   function _idle() {
-    if (_isClicked('leftClick')) {
+    if (Ctrls.isClicked('leftClick')) {
       Animations.play('attack', self.direction);
     } else {
       Animations.play('idle', self.direction);
     }
 
-    if (_isPressed('a') || _isPressed('d')) _machine.dispatch('run');
-    if (_isPressed('space')) _machine.dispatch('jump');
+    if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) _machine.dispatch('run');
+    if (Ctrls.isPressed('space')) _machine.dispatch('jump');
   }
 
   function _run() {
-    if (_isClicked('leftClick')) {
+    if (Ctrls.isClicked('leftClick')) {
       Animations.play('attack_run', self.direction);
     } else {
       Animations.play('run', self.direction);
     }
 
-    if (_isPressed('space')) _machine.dispatch('jump');
+    if (Ctrls.isPressed('space')) _machine.dispatch('jump');
 
-    if (_isPressed('a') || _isPressed('d')) {
-      if (self.direction === 'right') self.motion.hor += self.DEFAULTS.run.acceleration * self.DEFAULTS.friction;
-      if (self.direction === 'left') self.motion.hor -= self.DEFAULTS.run.acceleration * self.DEFAULTS.friction;
+    if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
+      if (self.direction === 'left') Self.apply(new Vector(-10000, 0));
+      if (self.direction === 'right') Self.apply(new Vector(10000, 0));
     } else {
-      if (self.motion.hor === 0) _machine.dispatch('idle');
+      if (Self.velocity.x === 0) _machine.dispatch('idle');
     }
   }
 
   function _jump() {
-    if (_isClicked('leftClick')) {
+    if (Ctrls.isClicked('leftClick')) {
       Animations.play('attack_jump', self.direction);
     } else {
       Animations.play('jump', self.direction);
     }
 
     if (Collision.hit('y')) {
-      self.motion.ver -= self.DEFAULTS.jump.acceleration;
+      Self.jump();
     } else {
       _machine.dispatch('idle');
     }
   }
 
   function _fall() {
-    if (_isClicked('leftClick')) {
+    if (Ctrls.isClicked('leftClick')) {
       Animations.play('attack_jump', self.direction);
     } else {
       Animations.play('fall', self.direction);
     }
     if (!Collision.hit('y')) {
-      self.motion.ver += self.DEFAULTS.fall.acceleration;
+      if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
+        if (self.direction === 'left') Self.apply(new Vector(-5000, 0));
+        if (self.direction === 'right') Self.apply(new Vector(5000, 0));
+      }
     } else {
       _machine.dispatch('idle');
     }
@@ -162,58 +134,43 @@ const Player = (function() {
 
   }
 
-  function init() {
-    Animations.init();
+  function _setPlayerDirection() {
+    if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
+      self.direction = (Ctrls.lastKeyPressed('a', 'd')) ? 'left' : 'right';
+    }
   }
 
-  function update(entity, dt) {
-    // Collision.set({
-    //   player: {
-    //     pos: self.pos, motion: self.motion, hitbox: self.hitbox, size: {width: self.DEFAULTS.width, height: self.DEFAULTS.height}
-    //   }
-    // });
-    //
-    // Collision.listen({
-    //   player: {
-    //     pos: self.pos, motion: self.motion, hitbox: self.hitbox, size: {width: self.DEFAULTS.width, height: self.DEFAULTS.height}
-    //   },
-    //   static_tiles: Events.listen('world_static_tiles')
-    // });
-
+  function update(dt) {
     _setPlayerDirection();
-
-    _machine.transitions[_machine.state].active();
-
-    _limitHorizontalSpeed();
-
-    if (Math.abs(self.motion.hor) < self.DEFAULTS.epsilon) self.motion.hor = 0;
-    if (Math.abs(self.motion.ver) < self.DEFAULTS.epsilon) self.motion.ver = 0;
 
     if (!Collision.hit('y') && _machine.state !== 'fall') _machine.dispatch('fall');
 
-    if (Collision.hit('x')) self.motion.hor = 0;
-    if (Collision.hit('y') || Collision.hit('y')) self.motion.ver = 0;
+    _machine.transitions[_machine.state].active();
 
-    if (!Collision.hit('x')) self.pos.x += self.motion.hor;
-    if (!Collision.hit('y')) self.pos.y += self.motion.ver;
+    Self.update(dt);
   }
 
   function render(ctx) {
-
-    let currentFrame = Animations.getRenderData();
+    let currentFrame = Animations.getCurrentFrame();
+    ctx.fillStyle = 'green';
+    ctx.fillRect(Self.pos.x, Self.pos.y, Self.width, Self.height);
     ctx.drawImage(currentFrame.sprite,
                   currentFrame.data.sX,
                   currentFrame.data.sY,
                   currentFrame.data.sWidth,
                   currentFrame.data.sHeight,
-                  Math.round(self.pos.x + currentFrame.data.offsetX),
-                  Math.round(self.pos.y + currentFrame.data.offsetY),
+                  Math.round(Self.pos.x - HITBOX.offsetX + currentFrame.data.offsetX),
+                  Math.round(Self.pos.y - HITBOX.offsetY + currentFrame.data.offsetY),
                   currentFrame.data.sWidth, currentFrame.data.sHeight);
   }
 
+  function init() {
+    Animations.init();
+  }
+
   return {
-    init,
     update,
-    render
+    render,
+    init
   };
 }());

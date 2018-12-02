@@ -8,6 +8,7 @@ class CollisionDetection {
   }
 
   update(pos, vel, width, height) {
+    this.tiles = Events.listen('tiles');
     this.x = false;
     this.y = false;
 

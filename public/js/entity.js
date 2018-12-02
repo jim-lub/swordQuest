@@ -20,10 +20,11 @@ class Entity {
     this.mass = object.mass;
     this.width = object.width;
     this.height = object.height;
-    this.position = new Vector(object.x, object.y);
+    this.pos = new Vector(object.x, object.y);
     this.velocity = new Vector(0, 0);
     this.acceleration = new Vector(0, 0);
     this.collision = new CollisionDetection();
+    this.vAcc = 0;
 
     this.F = {
       epsilon: 0.1,
@@ -39,7 +40,7 @@ class Entity {
   }
 
   _gravity() {
-    let f = new Vector(0, this.F.gravity * this.mass);
+    let f = new Vector(0, (this.F.gravity * (this.mass * 12)));
     return f;
   }
 
@@ -58,14 +59,8 @@ class Entity {
     return f;
   }
 
-  move(x, y) {
-    let force = new Vector(x, y);
-    this.apply(force);
-  }
-
-  jump(x, y) {
-    let force = new Vector(x, y);
-    this.apply(force);
+  jump() {
+    this.vAcc = 50000;
   }
 
   XY(v) {
@@ -76,21 +71,26 @@ class Entity {
   }
 
   update(dt) {
-    this.apply(Vector.multiply(this._gravity(), 1));
-    this.apply(Vector.multiply(this._friction(), 1));
-    this.apply(Vector.multiply(this._drag(), 1));
+    this.apply(this._friction());
+    this.apply(this._drag());
+    if (this.vAcc > 0) {
+      this.apply(new Vector(0, -this.vAcc));
+      this.vAcc *= 0.92;
+    }
+    if (this.vAcc < 1000) this.vAcc = 0;
+    this.apply(this._gravity());
 
-    this.velocity.add((this.acceleration.multiply(dt)));
+    this.velocity.add(this.acceleration);
 
-    // if (Math.abs(this.velocity.x) < 0.1) this.velocity.x = 0;
-    // if (Math.abs(this.velocity.y) < 0.1) this.velocity.y = 0;
+    if (Math.abs(this.velocity.x) < 0.2) this.velocity.x = 0;
+    if (Math.abs(this.velocity.y) < 0.2) this.velocity.y = 0;
 
-    this.collision.update(this.position, Vector.multiply(this.velocity, dt), this.width, this.height);
+    this.collision.update(this.pos, Vector.multiply(this.velocity, dt), this.width, this.height);
 
     if (this.collision.hit('y')) this.velocity.set(this.velocity.x, 0);
     if (this.collision.hit('x')) this.velocity.set(0, this.velocity.y);
 
-    this.position.add(this.velocity.multiply(dt));
+    this.pos.add(this.velocity.multiply(dt));
 
     this.acceleration.multiply(0);
   }
