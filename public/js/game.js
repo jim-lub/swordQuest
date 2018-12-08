@@ -39,16 +39,17 @@ const Game = (function() {
     Lvl.render(ctx);
 
     ctx.fillStyle = 'black';
+    ctx.globalAlpha = 0;
     LEVEL.forEach(cur => {
       ctx.fillRect(cur.x, cur.y, cur.width, cur.height);
     });
-
+    ctx.globalAlpha = 1;
     Player.render(ctx);
   }
 
   function init() {
     let spacingX = 0;
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 30; i++) {
       LEVEL.push(new Tile({x: spacingX, y: 480, width: 32, height: 32}));
       spacingX += 32;
     }
