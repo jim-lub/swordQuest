@@ -19,6 +19,6 @@ class Camera {
     } else {
       Events.emit('PLAYER_HIT_RIGHT_WALL', false);
     }
-    Events.emit('offsetX', this.offsetX);
+    Events.emit('offsetX', Math.round(this.offsetX));
   }
 }
