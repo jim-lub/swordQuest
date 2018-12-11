@@ -61,7 +61,7 @@ const Game = (function() {
 
   function init() {
     let spacingX = 0;
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 80; i++) {
       LEVEL.push(new Tile({x: spacingX, y: 480, width: 32, height: 32}));
       spacingX += 32;
     }
@@ -71,7 +71,7 @@ const Game = (function() {
     let tempoffsetx = 0;
     for (let i = 0; i < 10; i++) {
       ENEMIES.push(Enemy.init({x: 5 + tempoffsetx, y: 100, height: 60, width: 70, mass: 200}));
-      tempoffsetx += 25;
+      tempoffsetx += 35;
     }
 
     ENEMIES.forEach(cur => {

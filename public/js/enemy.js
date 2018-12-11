@@ -49,6 +49,11 @@ const Enemy = (function() {
                     Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.data.offsetX),
                     Math.round(state.pos.y - 10 + currentFrame.data.offsetY),
                     currentFrame.data.sWidth, currentFrame.data.sHeight);
+      ctx.save();
+      ctx.globalAlpha = 0.1;
+      ctx.fillStyle = 'red';
+      ctx.fillRect(Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.data.offsetX), Math.round(state.pos.y - 10 + currentFrame.data.offsetY), currentFrame.data.sWidth, currentFrame.data.sHeight);
+      ctx.restore();
     }
   });
 
