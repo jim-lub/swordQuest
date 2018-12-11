@@ -6,19 +6,19 @@ class Camera {
   }
 
   update(pos, vel, direction) {
-    if (pos.x <= 300 && direction === 'left') {
+    if (pos.x <= 200 && direction === 'left') {
       Events.emit('PLAYER_HIT_LEFT_WALL', true);
       this.offsetX += vel.x;
     } else {
       Events.emit('PLAYER_HIT_LEFT_WALL', false);
     }
 
-    if (pos.x >= 880 && direction === 'right') {
+    if (pos.x >= 700 && direction === 'right') {
       Events.emit('PLAYER_HIT_RIGHT_WALL', true);
       this.offsetX += vel.x;
     } else {
       Events.emit('PLAYER_HIT_RIGHT_WALL', false);
     }
-    Events.emit('offsetX', Math.round(this.offsetX));
+    Events.emit('CAMERA_OFFSET_X', Math.round(this.offsetX));
   }
 }

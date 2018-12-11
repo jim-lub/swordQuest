@@ -170,8 +170,6 @@ const Player = (function() {
 
   function render(ctx) {
     let currentFrame = Animations.getCurrentFrame();
-    // ctx.fillStyle = 'green';
-    // ctx.fillRect(Self.pos.x, Self.pos.y, Self.width, Self.height);
     ctx.drawImage(currentFrame.sprite,
                   currentFrame.data.sX,
                   currentFrame.data.sY,

@@ -2,7 +2,9 @@
 const Game = (function() {
   const Cam = new Camera();
   const Lvl = new Level();
+
   const LEVEL = [];
+  const ENEMIES = [];
   const ctx = document.getElementById('canvas').getContext('2d');
 
   const _loop = {
@@ -29,6 +31,12 @@ const Game = (function() {
   function _update(dt) {
     Lvl.update();
     Player.update(dt);
+
+    ENEMIES.forEach((cur, index) => {
+      cur.animations.play('run', 'right');
+      cur.update(dt);
+    });
+
     Cam.update(Player.getPosition(), Player.getVelocity(), Player.getDirection());
     Events.emit('tiles', LEVEL);
   }
@@ -44,6 +52,10 @@ const Game = (function() {
       ctx.fillRect(cur.x, cur.y, cur.width, cur.height);
     });
     ctx.globalAlpha = 1;
+    ENEMIES.forEach(cur => {
+      cur.apply(new Vector(5000, 0));
+      cur.render(ctx);
+    });
     Player.render(ctx);
   }
 
@@ -55,6 +67,19 @@ const Game = (function() {
     }
     Events.emit('tiles', LEVEL);
     Player.init();
+
+    let tempoffsetx = 0;
+    for (let i = 0; i < 10; i++) {
+      ENEMIES.push(Enemy.init({x: 5 + tempoffsetx, y: 100, height: 60, width: 70, mass: 200}));
+      tempoffsetx += 25;
+    }
+
+    ENEMIES.forEach(cur => {
+      cur.animations.init();
+    });
+
+    console.log(ENEMIES[0], ENEMIES[1]);
+
     window.requestAnimationFrame(_loop.loop.bind(_loop));
   }
 

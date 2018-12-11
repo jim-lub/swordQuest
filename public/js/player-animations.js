@@ -83,7 +83,6 @@ class PlayerAnimations {
     let sequence = this.sequences[`animation_${action}_${direction}`];
 
     sequence.forEach(frame => {
-      // if (this.currentIndex != frame.index) console.log(this.currentIndex);
       if (this.tickCount >= frame.start && this.tickCount <= frame.end && this.currentIndex != frame.index) {
         this.currentSprite = frame.sprite;
         this.currentData = {

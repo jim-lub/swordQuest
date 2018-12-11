@@ -18,5 +18,21 @@
       "animation_attack_jump_left": "attack-jump-l.png",
       "animation_attack_jump_right": "attack-jump-r.png"
     }
-  }
+  },
+  "hellishsmith": {
+      "folder": "assets/img/enemy/hellish-smith",
+      "images": {
+        "animation_idle": "idle.png",
+        "animation_run": "run.png",
+        "animation_attack": "attack.png"
+      }
+    },
+    "swordknight": {
+        "folder": "assets/img/enemy/sword-knight",
+        "images": {
+          "animation_idle": "idle.png",
+          "animation_run": "run.png",
+          "animation_attack": "attack.png"
+        }
+      }
 }
