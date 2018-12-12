@@ -32,23 +32,31 @@ const Enemy = (function() {
     state.acc.add(f);
   }
 
-  const init = (state) => {
-    const payload = [entity(state), render(state)];
-
-    return Object.assign(state, ...payload);
+  const build = (state, type) => {
+    return Object.assign(state, ...[entity(state), render(state)]);
   };
 
   const render = (state) => ({
+    animations: Animations.assign('hero'),
+    type: state.type,
     render: (ctx) => {
-      let currentFrame = state.animations.getCurrentFrame();
-      ctx.drawImage(currentFrame.sprite,
-                    currentFrame.data.sX,
-                    currentFrame.data.sY,
-                    currentFrame.data.sWidth,
-                    currentFrame.data.sHeight,
-                    Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.data.offsetX),
-                    Math.round(state.pos.y - 10 + currentFrame.data.offsetY),
-                    currentFrame.data.sWidth, currentFrame.data.sHeight);
+      // let currentFrame = state.animations.getCurrentFrame();
+      // ctx.drawImage(currentFrame.sprite,
+      //               currentFrame.data.sX,
+      //               currentFrame.data.sY,
+      //               currentFrame.data.sWidth,
+      //               currentFrame.data.sHeight,
+      //               Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.data.offsetX),
+      //               Math.round(state.pos.y - 10 + currentFrame.data.offsetY),
+      //               currentFrame.data.sWidth, currentFrame.data.sHeight);
+      let currentFrame = {
+        data: {
+          offsetX: 0,
+          offsetY: 0,
+          sWidth: 90,
+          sHeight: 60
+        }
+      };
       ctx.save();
       ctx.globalAlpha = 0.1;
       ctx.fillStyle = 'red';
@@ -62,7 +70,6 @@ const Enemy = (function() {
     vel: new Vector(0, 0),
     acc: new Vector(0, 0),
     collision: new CollisionDetection(),
-    animations: new PlayerAnimations(),
     apply: (v) => {
       let f = Vector.divide(v, state.mass);
       state.acc.add(f);
@@ -89,6 +96,6 @@ const Enemy = (function() {
   });
 
   return {
-    init
+    build
   };
 }());

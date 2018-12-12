@@ -122,8 +122,8 @@ const Player = (function() {
     }
     if (!Collision.hit('y')) {
       if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
-        if (self.direction === 'left') Self.apply(new Vector(-10000, 0));
-        if (self.direction === 'right') Self.apply(new Vector(10000, 0));
+        if (self.direction === 'left') Self.apply(new Vector(-13000, 0));
+        if (self.direction === 'right') Self.apply(new Vector(13000, 0));
       }
     } else {
       _machine.dispatch('idle');

@@ -33,7 +33,7 @@ const Game = (function() {
     Player.update(dt);
 
     ENEMIES.forEach((cur, index) => {
-      cur.animations.play('run', 'right');
+      // cur.animations.play('idle', 'left');
       cur.update(dt);
     });
 
@@ -69,16 +69,15 @@ const Game = (function() {
     Player.init();
 
     let tempoffsetx = 0;
-    for (let i = 0; i < 10; i++) {
-      ENEMIES.push(Enemy.init({x: 5 + tempoffsetx, y: 100, height: 60, width: 70, mass: 200}));
+    for (let i = 0; i < 3; i++) {
+      ENEMIES.push(Enemy.build({x: 5 + tempoffsetx, y: 100, height: 60, width: 70, mass: 200}, 'hero'));
       tempoffsetx += 35;
     }
 
     ENEMIES.forEach(cur => {
-      cur.animations.init();
+      // cur.animations.play('idle', 'left');
+      console.log(cur);
     });
-
-    console.log(ENEMIES[0], ENEMIES[1]);
 
     window.requestAnimationFrame(_loop.loop.bind(_loop));
   }

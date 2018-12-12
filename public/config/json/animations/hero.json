@@ -1,6 +1,6 @@
 {"hero": {
     "data": {
-      "folder": "assets/img/player",
+      "folder": "assets/img/player/",
       "images": {
         "animation_idle_left": "idle-l.png",
         "animation_idle_right": "idle-r.png",
