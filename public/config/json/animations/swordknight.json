@@ -1,0 +1,91 @@
+{"swordknight": {
+    "data": {
+      "folder": "assets/img/enemy/swordknight/",
+      "images": {
+        "animation_idle_left": "idle-l.png",
+        "animation_idle_right": "idle-r.png",
+        "animation_run_left": "run-l.png",
+        "animation_run_right": "run-r.png",
+        "animation_attack_left": "attack-l.png",
+        "animation_attack_right": "attack-r.png"
+      }
+    },
+    "actions": {
+      "idle": {
+        "sprite": {
+          "left": "animation_idle_left",
+          "right": "animation_idle_right"
+        },
+        "direction": ["left", "right"],
+        "ticksPerSequence": 79,
+        "ticksPerFrame": 10,
+        "frames": 8,
+        "sX": {
+          "right": [1372, 1176, 980, 784, 588, 392, 196, 0],
+          "left": [0, 196, 392, 588, 784, 980, 1176, 1372]
+        },
+        "sY": [0, 0, 0, 0, 0, 0, 0, 0],
+        "sWidth": 196,
+        "sHeight": 143,
+        "offsetX": {
+          "left": 0,
+          "right": 0
+        },
+        "offsetY": {
+          "left": 0,
+          "right": 0
+        }
+      },
+      "run": {
+        "sprite": {
+          "left": "animation_run_left",
+          "right": "animation_run_right"
+        },
+        "direction": ["left", "right"],
+        "ticksPerSequence": 79,
+        "ticksPerFrame": 10,
+        "frames": 8,
+        "sX": {
+          "right": [1372, 1176, 980, 784, 588, 392, 196, 0],
+          "left": [0, 196, 392, 588, 784, 980, 1176, 1372]
+        },
+        "sY": [0, 0, 0, 0, 0, 0, 0, 0],
+        "sWidth": 196,
+        "sHeight": 143,
+        "offsetX": {
+          "left": 0,
+          "right": 0
+        },
+        "offsetY": {
+          "left": 0,
+          "right": 0
+        }
+      },
+      "attack": {
+        "sprite": {
+          "left": "animation_attack_left",
+          "right": "animation_attack_right"
+        },
+        "direction": ["left", "right"],
+        "ticksPerSequence": 111,
+        "ticksPerFrame": 7,
+        "frames": 18,
+        "sX": {
+          "right": [3332, 3136, 2940, 2744, 2548, 2352, 2156, 1960, 1764, 1568, 1372, 1176, 980, 784, 588, 392, 196, 0],
+          "left": [0, 196, 392, 588, 784, 980, 1176, 1372, 1568, 1764, 1960, 2156, 2352, 2548, 2744, 2940, 3136, 3332]
+        },
+        "sY": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "sWidth": 196,
+        "sHeight": 143,
+        "offsetX": {
+          "left": 0,
+          "right": 0
+        },
+        "offsetY": {
+          "left": 0,
+          "right": 0
+        }
+      }
+    }
+  }
+}

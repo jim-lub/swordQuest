@@ -33,7 +33,10 @@ const Game = (function() {
     Player.update(dt);
 
     ENEMIES.forEach((cur, index) => {
-      // cur.animations.play('idle', 'left');
+      if (index === 0) cur.animations.play('idle', 'right');
+      if (index === 1) cur.animations.play('run', 'right');
+      if (index === 2) cur.animations.play('attack', 'left');
+      if (index === 3) cur.animations.play('attack', 'left');
       cur.update(dt);
     });
 
@@ -52,14 +55,15 @@ const Game = (function() {
       ctx.fillRect(cur.x, cur.y, cur.width, cur.height);
     });
     ctx.globalAlpha = 1;
-    ENEMIES.forEach(cur => {
-      cur.apply(new Vector(5000, 0));
+    ENEMIES.forEach((cur, index) => {
+      if (index === 1) cur.apply(new Vector(5000, 0));
       cur.render(ctx);
     });
     Player.render(ctx);
   }
 
   function init() {
+    console.log(Assets.images);
     let spacingX = 0;
     for (let i = 0; i < 80; i++) {
       LEVEL.push(new Tile({x: spacingX, y: 480, width: 32, height: 32}));
@@ -68,16 +72,10 @@ const Game = (function() {
     Events.emit('tiles', LEVEL);
     Player.init();
 
-    let tempoffsetx = 0;
-    for (let i = 0; i < 3; i++) {
-      ENEMIES.push(Enemy.build({x: 5 + tempoffsetx, y: 100, height: 60, width: 70, mass: 200}, 'hero'));
-      tempoffsetx += 35;
-    }
-
-    ENEMIES.forEach(cur => {
-      // cur.animations.play('idle', 'left');
-      console.log(cur);
-    });
+    ENEMIES.push(Enemy.build({x: 50, y: 100, height: 120, width: 170, mass: 400, type: 'hellishsmith'}));
+    ENEMIES.push(Enemy.build({x: 400, y: 100, height: 143, width: 196, mass: 400, type: 'swordknight'}));
+    ENEMIES.push(Enemy.build({x: 400, y: 100, height: 143, width: 196, mass: 400, type: 'swordknight'}));
+    ENEMIES.push(Enemy.build({x: 800, y: 100, height: 120, width: 170, mass: 400, type: 'hellishsmith'}));
 
     window.requestAnimationFrame(_loop.loop.bind(_loop));
   }

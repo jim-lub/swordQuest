@@ -53,15 +53,15 @@ const Animations = (function() {
             savedAnimationSequences[type][`animation_${cur[0]}_${dir}`] = buildSequence(cur[1], type, cur[0], dir);
           });
         });
+        resolve();
       })
       .catch(e => reject(e));
-      resolve();
     });
   }
 
   function init() {
     return new Promise((resolve, reject) => {
-      let objects = [build('hero')];
+      let objects = [build('hero'), build('hellishsmith'), build('swordknight')];
 
       Promise.all(objects)
       .then(() => resolve())
@@ -75,7 +75,7 @@ const Animations = (function() {
       currentData: null,
       currentIndex: null,
       tickCount: 0,
-      sequences: savedAnimationSequences[type]
+      type: type
     };
     return Object.assign(state, ...[play(state)]);
   }
@@ -83,10 +83,9 @@ const Animations = (function() {
   const play = (state) => ({
     play: (action, dir) => {
       state.tickCount++;
-      let sequence = state.sequences[`animation_${action}_${dir}`];
+      let sequence = savedAnimationSequences[state.type][`animation_${action}_${dir}`];
 
       sequence.forEach(frame => {
-        console.log(frame);
         if (state.tickCount >= frame.start && state.tickCount <= frame.end && state.currentIndex != frame.index) {
           state.currentSprite = frame.sprite;
           state.currentData = {

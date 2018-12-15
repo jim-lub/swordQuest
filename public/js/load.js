@@ -63,12 +63,16 @@ const Load = (function() {
     return new Promise((resolve, reject) => {
       let promises = [];
       promises.push(_load('sprites.json', 'player'));
+
       promises.push(_loadSprites('animations/hero.json', 'hero'));
+      promises.push(_loadSprites('animations/hellishsmith.json', 'hellishsmith'));
+      promises.push(_loadSprites('animations/swordknight.json', 'swordknight'));
+
       promises.push(_load('backgrounds.json', 'forest'));
 
       Promise.all(promises)
       .then(() => resolve())
-      .catch(e => console.log(e));
+      .catch(e => reject(e));
     });
   }
 

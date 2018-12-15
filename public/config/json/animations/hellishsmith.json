@@ -1,0 +1,91 @@
+{"hellishsmith": {
+    "data": {
+      "folder": "assets/img/enemy/hellishsmith/",
+      "images": {
+        "animation_idle_left": "idle-l.png",
+        "animation_idle_right": "idle-r.png",
+        "animation_run_left": "run-l.png",
+        "animation_run_right": "run-r.png",
+        "animation_attack_left": "attack-l.png",
+        "animation_attack_right": "attack-r.png"
+      }
+    },
+    "actions": {
+      "idle": {
+        "sprite": {
+          "left": "animation_idle_left",
+          "right": "animation_idle_right"
+        },
+        "direction": ["left", "right"],
+        "ticksPerSequence": 79,
+        "ticksPerFrame": 10,
+        "frames": 8,
+        "sX": {
+          "right": [1190, 1020, 850, 680, 510, 340, 170, 0],
+          "left": [0, 170, 340, 510, 680, 850, 1020, 1190]
+        },
+        "sY": [0, 0, 0, 0, 0, 0, 0, 0],
+        "sWidth": 170,
+        "sHeight": 120,
+        "offsetX": {
+          "left": 0,
+          "right": 0
+        },
+        "offsetY": {
+          "left": 0,
+          "right": 0
+        }
+      },
+      "run": {
+        "sprite": {
+          "left": "animation_run_left",
+          "right": "animation_run_right"
+        },
+        "direction": ["left", "right"],
+        "ticksPerSequence": 79,
+        "ticksPerFrame": 10,
+        "frames": 8,
+        "sX": {
+          "right": [1190, 1020, 850, 680, 510, 340, 170, 0],
+          "left": [0, 170, 340, 510, 680, 850, 1020, 1190]
+        },
+        "sY": [0, 0, 0, 0, 0, 0, 0, 0],
+        "sWidth": 170,
+        "sHeight": 120,
+        "offsetX": {
+          "left": 0,
+          "right": 0
+        },
+        "offsetY": {
+          "left": 0,
+          "right": 0
+        }
+      },
+      "attack": {
+        "sprite": {
+          "left": "animation_attack_left",
+          "right": "animation_attack_right"
+        },
+        "direction": ["left", "right"],
+        "ticksPerSequence": 111,
+        "ticksPerFrame": 7,
+        "frames": 16,
+        "sX": {
+          "right": [2550, 2380, 2210, 2040, 1870, 1700, 1530, 1360, 1190, 1020, 850, 680, 510, 340, 170, 0],
+          "left": [0, 170, 340, 510, 680, 850, 1020, 1190, 1360, 1530, 1700, 1870, 2040, 2210, 2380, 2550]
+        },
+        "sY": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "sWidth": 170,
+        "sHeight": 120,
+        "offsetX": {
+          "left": 0,
+          "right": 0
+        },
+        "offsetY": {
+          "left": 0,
+          "right": 0
+        }
+      }
+    }
+  }
+}

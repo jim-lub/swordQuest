@@ -32,35 +32,26 @@ const Enemy = (function() {
     state.acc.add(f);
   }
 
-  const build = (state, type) => {
+  const build = (state) => {
     return Object.assign(state, ...[entity(state), render(state)]);
   };
 
   const render = (state) => ({
-    animations: Animations.assign('hero'),
-    type: state.type,
+    animations: Animations.assign(state.type),
     render: (ctx) => {
-      // let currentFrame = state.animations.getCurrentFrame();
-      // ctx.drawImage(currentFrame.sprite,
-      //               currentFrame.data.sX,
-      //               currentFrame.data.sY,
-      //               currentFrame.data.sWidth,
-      //               currentFrame.data.sHeight,
-      //               Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.data.offsetX),
-      //               Math.round(state.pos.y - 10 + currentFrame.data.offsetY),
-      //               currentFrame.data.sWidth, currentFrame.data.sHeight);
-      let currentFrame = {
-        data: {
-          offsetX: 0,
-          offsetY: 0,
-          sWidth: 90,
-          sHeight: 60
-        }
-      };
+      let currentFrame = state.animations.currentData;
+      ctx.drawImage(state.animations.currentSprite,
+                    currentFrame.sX,
+                    currentFrame.sY,
+                    currentFrame.sWidth,
+                    currentFrame.sHeight,
+                    Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.offsetX),
+                    Math.round(state.pos.y - 10 + currentFrame.offsetY),
+                    currentFrame.sWidth, currentFrame.sHeight);
       ctx.save();
       ctx.globalAlpha = 0.1;
       ctx.fillStyle = 'red';
-      ctx.fillRect(Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.data.offsetX), Math.round(state.pos.y - 10 + currentFrame.data.offsetY), currentFrame.data.sWidth, currentFrame.data.sHeight);
+      // ctx.fillRect(Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.offsetX), Math.round(state.pos.y - 10 + currentFrame.offsetY), currentFrame.sWidth, currentFrame.sHeight);
       ctx.restore();
     }
   });
