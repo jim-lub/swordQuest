@@ -3,5 +3,5 @@ $(document).ready(function(){
   Load.images()
   .then(() => Animations.init())
   .then(() => Game.init())
-  .catch(e => reject(e));
+  .catch(e => console.log(e));
 });

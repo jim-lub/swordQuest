@@ -60,12 +60,16 @@ const Enemy = (function() {
     pos: new Vector(state.x, state.y),
     vel: new Vector(0, 0),
     acc: new Vector(0, 0),
+    dir: 'right',
     collision: new CollisionDetection(),
     apply: (v) => {
       let f = Vector.divide(v, state.mass);
       state.acc.add(f);
     },
     update: (dt) => {
+      state.transitions[state.currentState].active();
+      state.animations.play(state.currentState, state.dir);
+      
       _apply(state, _gravity(state));
       _apply(state, _friction(state));
       _apply(state, _drag(state));
@@ -83,6 +87,52 @@ const Enemy = (function() {
       state.vel.multiply(dt);
       state.pos.add(state.vel);
       state.acc.multiply(0);
+    },
+    dispatch: (actionName) => {
+      const actions = state.transitions[state.currentState];
+      const action = state.transitions[state.currentState][actionName];
+
+      if (action) {
+        action.apply(state);
+      }
+    },
+    changeStateTo: (transition) => {
+      state.currentState = transition;
+    },
+    currentState: 'idle',
+    transitions: {
+      'idle': {
+        active() { state.idle(); },
+        run() { state.changeStateTo('run'); },
+        attack() { state.changeStateTo('attack'); }
+      },
+      'run': {
+        active() { state.run(); },
+        idle() { state.changeStateTo('idle'); },
+        attack() { state.changeStateTo('attack'); }
+      },
+      'attack': {
+        active() { state.attack(); },
+        idle() { state.changeStateTo('idle'); },
+        run() { state.changeStateTo('run'); }
+      }
+    },
+    idle: () => {
+      if (Math.abs(state.vel.x) > 0) state.dispatch('run');
+      let distance = Math.abs(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
+      if (distance < 100) state.dispatch('attack');
+    },
+    run: () => {
+      if (Math.abs(state.vel.x) === 0) state.dispatch('idle');
+      let distance = Math.abs(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
+      if (distance < 100) state.dispatch('attack');
+    },
+    attack: () => {
+      let direction = Math.sign(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
+      let distance = Math.abs(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
+
+      state.dir = (direction === 1) ? 'left' : 'right';
+      if (distance > 100) state.dispatch('idle');
     }
   });
 

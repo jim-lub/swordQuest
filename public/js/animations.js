@@ -13,7 +13,7 @@ const Animations = (function() {
     swordknight: {}
   };
 
-  function buildSequence(data, type, action, dir) {
+  function _buildSequence(data, type, action, dir) {
     const CFG = data;
     let sequence = [];
 
@@ -43,14 +43,14 @@ const Animations = (function() {
     return sequence;
   }
 
-  function build(type) {
+  function _build(type) {
     return new Promise((resolve, reject) => {
       _loadJSON(`${type}.json`).then(data => {
         let entries = Object.entries(data[type].actions);
 
         entries.forEach(cur => {
           cur[1].direction.forEach(dir => {
-            savedAnimationSequences[type][`animation_${cur[0]}_${dir}`] = buildSequence(cur[1], type, cur[0], dir);
+            savedAnimationSequences[type][`animation_${cur[0]}_${dir}`] = _buildSequence(cur[1], type, cur[0], dir);
           });
         });
         resolve();
@@ -61,7 +61,7 @@ const Animations = (function() {
 
   function init() {
     return new Promise((resolve, reject) => {
-      let objects = [build('hero'), build('hellishsmith'), build('swordknight')];
+      let objects = [_build('hero'), _build('hellishsmith'), _build('swordknight')];
 
       Promise.all(objects)
       .then(() => resolve())

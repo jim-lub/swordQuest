@@ -160,6 +160,7 @@ const Player = (function() {
 
   function update(dt) {
     _setPlayerDirection();
+    Events.emit('PLAYER_POSITION', Self.pos);
 
     if (!Collision.hit('y') && _machine.state !== 'fall') _machine.dispatch('fall');
 
