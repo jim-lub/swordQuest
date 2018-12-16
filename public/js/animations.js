@@ -1,17 +1,17 @@
 /* jshint esversion: 6 */
 const Animations = (function() {
 
-  function _loadJSON(file) {
-    return new Promise((resolve, reject) => {
-      $.getJSON(`config/json/animations/${file}`, (result) => { resolve(result); });
-    });
-  }
-
   const savedAnimationSequences = {
     hero: {},
     hellishsmith: {},
     swordknight: {}
   };
+
+  function _loadJSON(file) {
+    return new Promise((resolve, reject) => {
+      $.getJSON(`config/json/animations/${file}`, (result) => { resolve(result); });
+    });
+  }
 
   function _buildSequence(data, type, action, dir) {
     const CFG = data;
@@ -86,17 +86,20 @@ const Animations = (function() {
       let sequence = savedAnimationSequences[state.type][`animation_${action}_${dir}`];
 
       sequence.forEach(frame => {
-        if (state.tickCount >= frame.start && state.tickCount <= frame.end && state.currentIndex != frame.index) {
-          state.currentSprite = frame.sprite;
-          state.currentData = {
-            sX: frame.sX,
-            sY: frame.sY,
-            sWidth: frame.sWidth,
-            sHeight: frame.sHeight,
-            offsetX: frame.offsetX,
-            offsetY: frame.offsetY
-          };
-          state.currentIndex = frame.index;
+        if (state.tickCount >= frame.start &&
+            state.tickCount <= frame.end &&
+            state.currentIndex != frame.index) {
+
+              state.currentSprite = frame.sprite;
+              state.currentData = {
+                sX: frame.sX,
+                sY: frame.sY,
+                sWidth: frame.sWidth,
+                sHeight: frame.sHeight,
+                offsetX: frame.offsetX,
+                offsetY: frame.offsetY
+              };
+              state.currentIndex = frame.index;
         }
 
         if (state.tickCount > frame.ticksPerSequence) {

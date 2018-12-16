@@ -28,8 +28,8 @@
         "sWidth": 170,
         "sHeight": 120,
         "offsetX": {
-          "left": 0,
-          "right": 0
+          "left": -100,
+          "right": -15
         },
         "offsetY": {
           "left": 0,
@@ -53,8 +53,8 @@
         "sWidth": 170,
         "sHeight": 120,
         "offsetX": {
-          "left": 0,
-          "right": 0
+          "left": -100,
+          "right": -15
         },
         "offsetY": {
           "left": 0,
@@ -78,8 +78,8 @@
         "sWidth": 170,
         "sHeight": 120,
         "offsetX": {
-          "left": 0,
-          "right": 0
+          "left": -100,
+          "right": -15
         },
         "offsetY": {
           "left": 0,

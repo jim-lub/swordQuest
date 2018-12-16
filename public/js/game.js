@@ -52,7 +52,6 @@ const Game = (function() {
     });
     ctx.globalAlpha = 1;
     ENEMIES.forEach((cur, index) => {
-      if (index === 1) cur.apply(new Vector(5000, 0));
       cur.render(ctx);
     });
     Player.render(ctx);
@@ -68,8 +67,8 @@ const Game = (function() {
     Player.init();
 
     ENEMIES.push(Enemy.build({x: 50, y: 100, height: 120, width: 170, mass: 400, type: 'hellishsmith'}));
-    ENEMIES.push(Enemy.build({x: 400, y: 100, height: 143, width: 196, mass: 400, type: 'swordknight'}));
-    ENEMIES.push(Enemy.build({x: 400, y: 100, height: 143, width: 196, mass: 400, type: 'swordknight'}));
+    ENEMIES.push(Enemy.build({x: 250, y: 100, height: 143, width: 196, mass: 400, type: 'swordknight'}));
+    ENEMIES.push(Enemy.build({x: 550, y: 100, height: 143, width: 196, mass: 400, type: 'swordknight'}));
     ENEMIES.push(Enemy.build({x: 800, y: 100, height: 120, width: 170, mass: 400, type: 'hellishsmith'}));
 
     ENEMIES.forEach((cur, index) => {

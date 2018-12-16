@@ -51,7 +51,10 @@ const Enemy = (function() {
       ctx.save();
       ctx.globalAlpha = 0.1;
       ctx.fillStyle = 'red';
-      // ctx.fillRect(Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.offsetX), Math.round(state.pos.y - 10 + currentFrame.offsetY), currentFrame.sWidth, currentFrame.sHeight);
+      ctx.fillRect(Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
+                    Math.round(state.pos.y),
+                    60,
+                    120);
       ctx.restore();
     }
   });
@@ -69,7 +72,7 @@ const Enemy = (function() {
     update: (dt) => {
       state.transitions[state.currentState].active();
       state.animations.play(state.currentState, state.dir);
-      
+
       _apply(state, _gravity(state));
       _apply(state, _friction(state));
       _apply(state, _drag(state));
@@ -120,19 +123,24 @@ const Enemy = (function() {
     idle: () => {
       if (Math.abs(state.vel.x) > 0) state.dispatch('run');
       let distance = Math.abs(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
-      if (distance < 100) state.dispatch('attack');
+      if (distance > 50 && distance < 200) state.dispatch('run');
+      if (distance < 50) state.dispatch('attack');
     },
     run: () => {
       if (Math.abs(state.vel.x) === 0) state.dispatch('idle');
+
+      let direction = Math.sign(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
       let distance = Math.abs(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
-      if (distance < 100) state.dispatch('attack');
+
+      if (distance > 50 && distance < 200) state.apply(new Vector(8000 * -direction, 0));
+      if (distance < 50) state.dispatch('attack');
     },
     attack: () => {
       let direction = Math.sign(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
       let distance = Math.abs(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
 
       state.dir = (direction === 1) ? 'left' : 'right';
-      if (distance > 100) state.dispatch('idle');
+      if (distance > 50) state.dispatch('idle');
     }
   });
 
