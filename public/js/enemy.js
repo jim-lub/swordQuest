@@ -32,6 +32,14 @@ const Enemy = (function() {
     state.acc.add(f);
   }
 
+  function _drawHealth(ctx, health, x, y) {
+    ctx.save();
+    ctx.fillStyle = "red";
+    ctx.font = "20px Arial";
+    ctx.fillText(health, x, y);
+    ctx.restore();
+  }
+
   const build = (state) => {
     return Object.assign(state, ...[entity(state), render(state)]);
   };
@@ -46,16 +54,20 @@ const Enemy = (function() {
                     currentFrame.sWidth,
                     currentFrame.sHeight,
                     Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.offsetX),
-                    Math.round(state.pos.y - 10 + currentFrame.offsetY),
+                    Math.round(state.pos.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
-      ctx.save();
-      ctx.globalAlpha = 0.1;
-      ctx.fillStyle = 'red';
-      ctx.fillRect(Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
-                    Math.round(state.pos.y),
-                    60,
-                    120);
-      ctx.restore();
+
+      Tests.drawHitbox(ctx,
+                      Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
+                      Math.round(state.pos.y),
+                      state.hitbox.width,
+                      state.hitbox.height);
+
+      Tests.drawCollisionPoints(ctx, true, state.collision.collisionPoints);
+
+      _drawHealth(ctx, state.health,
+                  Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
+                  Math.round(state.pos.y - 10));
     }
   });
 
@@ -64,6 +76,11 @@ const Enemy = (function() {
     vel: new Vector(0, 0),
     acc: new Vector(0, 0),
     dir: 'right',
+    health: 100,
+    hitbox: {
+      width: state.width,
+      height: state.height
+    },
     collision: new CollisionDetection(),
     apply: (v) => {
       let f = Vector.divide(v, state.mass);
@@ -132,7 +149,7 @@ const Enemy = (function() {
       let direction = Math.sign(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
       let distance = Math.abs(state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')));
 
-      if (distance > 50 && distance < 200) state.apply(new Vector(8000 * -direction, 0));
+      if (distance > 50 && distance < 200) state.apply(new Vector(15000 * -direction, 0));
       if (distance < 50) state.dispatch('attack');
     },
     attack: () => {

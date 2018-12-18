@@ -179,6 +179,14 @@ const Player = (function() {
                   Math.round(Self.pos.x - HITBOX.offsetX + currentFrame.data.offsetX),
                   Math.round(Self.pos.y - HITBOX.offsetY + currentFrame.data.offsetY),
                   currentFrame.data.sWidth, currentFrame.data.sHeight);
+
+    Tests.drawHitbox(ctx,
+                    Math.round(Self.pos.x),
+                    Math.round(Self.pos.y),
+                    HITBOX.width,
+                    HITBOX.height);
+
+    Tests.drawCollisionPoints(ctx, false, Collision.collisionPoints);
   }
 
   function init() {

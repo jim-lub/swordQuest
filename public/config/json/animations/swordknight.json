@@ -8,6 +8,10 @@
         "animation_run_right": "run-r.png",
         "animation_attack_left": "attack-l.png",
         "animation_attack_right": "attack-r.png"
+      },
+      "hitbox": {
+        "width": 50,
+        "height": 65
       }
     },
     "actions": {
@@ -32,8 +36,8 @@
           "right": -40
         },
         "offsetY": {
-          "left": 0,
-          "right": 0
+          "left": -78,
+          "right": -78
         }
       },
       "run": {
@@ -57,8 +61,8 @@
           "right": -40
         },
         "offsetY": {
-          "left": 0,
-          "right": 0
+          "left": -78,
+          "right": -78
         }
       },
       "attack": {
@@ -82,8 +86,8 @@
           "right": -40
         },
         "offsetY": {
-          "left": 0,
-          "right": 0
+          "left": -78,
+          "right": -78
         }
       }
     }

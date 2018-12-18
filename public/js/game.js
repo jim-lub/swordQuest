@@ -66,10 +66,10 @@ const Game = (function() {
     Events.emit('tiles', LEVEL);
     Player.init();
 
-    ENEMIES.push(Enemy.build({x: 50, y: 100, height: 120, width: 170, mass: 400, type: 'hellishsmith'}));
-    ENEMIES.push(Enemy.build({x: 250, y: 100, height: 143, width: 196, mass: 400, type: 'swordknight'}));
-    ENEMIES.push(Enemy.build({x: 550, y: 100, height: 143, width: 196, mass: 400, type: 'swordknight'}));
-    ENEMIES.push(Enemy.build({x: 800, y: 100, height: 120, width: 170, mass: 400, type: 'hellishsmith'}));
+    ENEMIES.push(Enemy.build({x: 50, y: 100, height: 75, width: 70, mass: 400, type: 'hellishsmith'}));
+    ENEMIES.push(Enemy.build({x: 450, y: 100, height: 65, width: 50, mass: 400, type: 'swordknight'}));
+    ENEMIES.push(Enemy.build({x: 750, y: 100, height: 65, width: 50, mass: 400, type: 'swordknight'}));
+    ENEMIES.push(Enemy.build({x: 800, y: 100, height: 75, width: 70, mass: 400, type: 'hellishsmith'}));
 
     ENEMIES.forEach((cur, index) => {
       console.log(cur);
