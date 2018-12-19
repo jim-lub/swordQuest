@@ -4,7 +4,8 @@ const Tests = (function() {
   const isEnabled = {
     hitbox: true,
     collisionPoints: true,
-    fov: false
+    fov: true,
+    attackRadius: true
   };
 
   function drawHitbox(ctx, x, y, width, height) {
@@ -12,7 +13,7 @@ const Tests = (function() {
 
     ctx.save();
     ctx.globalAlpha = 0.3;
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = "green";
     ctx.fillRect(x, y, width, height);
     ctx.restore();
   }
@@ -22,7 +23,7 @@ const Tests = (function() {
 
     ctx.save();
     ctx.globalAlpha = 0.7;
-    ctx.fillStyle = 'orange';
+    ctx.fillStyle = "orange";
     collisionPoints.forEach(cur => {
       let x = (cameraOffset) ? -Events.listen('CAMERA_OFFSET_X') + cur.x : cur.x;
       ctx.fillRect(Math.round(x - 1.5), Math.round(cur.y - 3), 3, 3);
@@ -30,14 +31,37 @@ const Tests = (function() {
     ctx.restore();
   }
 
-  function drawFov(ctx, {fov}) {
+  function drawFov(ctx, x, y, width, height, range) {
     if (!isEnabled.fov) return;
+
+    ctx.save();
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    ctx.arc(x + (width / 2), y + height, range, Math.PI, 0, false);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawAttackRadius(ctx, x, y, width, height, range) {
+    if (!isEnabled.attackRadius) return;
+
+    ctx.save();
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(x + (width / 2), y + height, range, Math.PI, 0, false);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
   }
 
   return {
     drawHitbox,
     drawCollisionPoints,
     drawFov,
+    drawAttackRadius,
     isEnabled
   };
 }());
