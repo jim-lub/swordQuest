@@ -49,22 +49,9 @@ const Enemy = (function() {
     render: (ctx) => {
       let currentFrame = state.animations.currentData;
 
-      Tests.drawFov(ctx,
-                    Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
-                    Math.round(state.pos.y),
-                    state.hitbox.width,
-                    state.hitbox.height,
-                    state.fov);
-      Tests.drawAttackRadius(ctx,
-                    Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
-                    Math.round(state.pos.y),
-                    state.hitbox.width,
-                    state.hitbox.height,
-                    state.radius);
-
-      _drawHealth(ctx, state.health,
-                  Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
-                  Math.round(state.pos.y - 30));
+      Tests.drawFov(ctx, Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x), Math.round(state.pos.y), state.hitbox.width, state.hitbox.height, state.fov);
+      Tests.drawAttackRadius(ctx, Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x), Math.round(state.pos.y), state.hitbox.width, state.hitbox.height, state.radius);
+      _drawHealth(ctx, state.health, Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),Math.round(state.pos.y - 30));
 
       ctx.drawImage(state.animations.currentSprite,
                     currentFrame.sX,
@@ -75,12 +62,7 @@ const Enemy = (function() {
                     Math.round(state.pos.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
 
-      Tests.drawHitbox(ctx,
-                      Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
-                      Math.round(state.pos.y),
-                      state.hitbox.width,
-                      state.hitbox.height);
-
+      Tests.drawHitbox(ctx, Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x), Math.round(state.pos.y), state.hitbox.width, state.hitbox.height);
       Tests.drawCollisionPoints(ctx, true, state.collision.collisionPoints);
     }
   });
