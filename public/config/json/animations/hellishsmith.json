@@ -10,7 +10,7 @@
         "animation_attack_right": "attack-r.png"
       },
       "hitbox": {
-        "width": 70,
+        "width": 60,
         "height": 75
       }
     },

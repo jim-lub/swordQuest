@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 const Enemy = (function() {
-  const F = {
+  const FORCES = {
     epsilon: 0.1,
     gravity: 9.81,
     friction: -0.99,
@@ -8,14 +8,14 @@ const Enemy = (function() {
   };
 
   function _gravity(state) {
-    let f = new Vector(0, (F.gravity * (state.mass * 12)));
+    let f = new Vector(0, (FORCES.gravity * (state.mass * 12)));
     return f;
   }
 
   function _friction(state) {
     let f = state.vel.clone();
     f.normalize();
-    f.multiply(F.friction);
+    f.multiply(FORCES.friction);
     return f;
   }
 
@@ -23,7 +23,7 @@ const Enemy = (function() {
     let f = state.vel.clone();
     let speed = state.vel.mag();
     f.normalize();
-    f.multiply(F.drag * speed * speed);
+    f.multiply(FORCES.drag * speed * speed);
     return f;
   }
 
@@ -90,6 +90,7 @@ const Enemy = (function() {
     acc: new Vector(0, 0),
     dir: 'right',
     health: 100,
+    cooldown: 0,
     hitbox: {
       width: state.width,
       height: state.height
@@ -99,6 +100,7 @@ const Enemy = (function() {
     update: (dt) => {
       state.transitions[state.currentState].active();
       state.animations.play(state.currentState, state.dir);
+      state.isHitByPlayer();
 
       _apply(state, _gravity(state));
       _apply(state, _friction(state));
@@ -106,8 +108,8 @@ const Enemy = (function() {
 
       state.vel.add(state.acc);
 
-      if (Math.abs(state.vel.x) < F.epsilon) state.vel.x = 0;
-      if (Math.abs(state.vel.y) < F.epsilon) state.vel.y = 0;
+      if (Math.abs(state.vel.x) < FORCES.epsilon) state.vel.x = 0;
+      if (Math.abs(state.vel.y) < FORCES.epsilon) state.vel.y = 0;
 
       state.collision.update(state.pos, Vector.multiply(state.vel, dt), state.width, state.height);
 
@@ -175,6 +177,21 @@ const Enemy = (function() {
       state.setDirection();
       state.distanceToPlayer();
       if (state.distance > state.radius) state.dispatch('idle');
+    },
+
+    isHitByPlayer: () => {
+      state.cooldown--;
+      if (state.cooldown > 0) return;
+      let box = Events.listen('PLAYER_ATTACKBOX');
+      if (box.range === 0) return;
+
+      if (state.distance < 50 && state.dirInt === Math.sign(box.range)) {
+        state.health -= box.damage;
+        state.cooldown = box.cooldown;
+      }
+      if (state.health <= 0) {
+        // Dead
+      }
     },
 
     apply: (v) => {

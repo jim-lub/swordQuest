@@ -23,7 +23,7 @@ const Player = (function() {
     y: DEFAULTS.pos.y,
     width: HITBOX.width,
     height: HITBOX.height,
-    mass: DEFAULTS.mass
+    mass: DEFAULTS.mass,
   });
   const Collision = Self.collision;
   const Ctrls = new Controls();
@@ -50,7 +50,7 @@ const Player = (function() {
         run() { this.changeStateTo('run'); },
         jump() { this.changeStateTo('jump'); },
         fall() { this.changeStateTo('fall'); },
-        attack() {}
+        attack() { this.changeStateTo('attack'); }
       },
       'run': {
         active() { _run(); },
@@ -75,8 +75,10 @@ const Player = (function() {
   function _idle() {
     if (Ctrls.isClicked('leftClick')) {
       Animations.play('attack', self.direction);
+      _attack();
     } else {
       Animations.play('idle', self.direction);
+      _clearPlayerAttackBox();
     }
 
     if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) _machine.dispatch('run');
@@ -86,8 +88,10 @@ const Player = (function() {
   function _run() {
     if (Ctrls.isClicked('leftClick')) {
       Animations.play('attack_run', self.direction);
+      _attack();
     } else {
       Animations.play('run', self.direction);
+      _clearPlayerAttackBox();
     }
 
     if (Ctrls.isPressed('space')) _machine.dispatch('jump');
@@ -103,8 +107,10 @@ const Player = (function() {
   function _jump() {
     if (Ctrls.isClicked('leftClick')) {
       Animations.play('attack_jump', self.direction);
+      _attack();
     } else {
       Animations.play('jump', self.direction);
+      _clearPlayerAttackBox();
     }
 
     if (Collision.hit('y')) {
@@ -117,8 +123,10 @@ const Player = (function() {
   function _fall() {
     if (Ctrls.isClicked('leftClick')) {
       Animations.play('attack_jump', self.direction);
+      _attack();
     } else {
       Animations.play('fall', self.direction);
+      _clearPlayerAttackBox();
     }
     if (!Collision.hit('y')) {
       if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
@@ -131,7 +139,32 @@ const Player = (function() {
   }
 
   function _attack() {
+    if (self.direction === 'right') {
+      Events.emit('PLAYER_ATTACKBOX', {
+        x: Self.pos.x + HITBOX.width,
+        y: Self.pos.y,
+        range: 45,
+        cooldown: 30,
+        damage: 10
+      });
+    } else {
+      Events.emit('PLAYER_ATTACKBOX', {
+        x: Self.pos.x,
+        y: Self.pos.y,
+        range: -45,
+        cooldown: 30,
+        damage: 10
+      });
+    }
+  }
 
+  function _clearPlayerAttackBox() {
+    Events.emit('PLAYER_ATTACKBOX', {
+      x: 0,
+      y: 0,
+      range: 0,
+      cooldown: 0
+    });
   }
 
   function _setPlayerDirection() {
@@ -158,8 +191,17 @@ const Player = (function() {
     return self.direction;
   }
 
-  function update(dt) {
+  function _drawHealth(ctx, health, x, y) {
+    ctx.save();
+    ctx.fillStyle = "red";
+    ctx.font = "10px Arial";
+    ctx.fillText(health, x, y);
+    ctx.restore();
+  }
+
+  function update(dt, ENEMIES) {
     _setPlayerDirection();
+
     Events.emit('PLAYER_POSITION', Self.pos);
     Events.emit('PLAYER_HITBOX', HITBOX);
 
@@ -181,11 +223,23 @@ const Player = (function() {
                   Math.round(Self.pos.y - HITBOX.offsetY + currentFrame.data.offsetY),
                   currentFrame.data.sWidth, currentFrame.data.sHeight);
 
+    _drawHealth(ctx, Events.listen('CAMERA_OFFSET_X') + Self.pos.x,
+                Math.round(Self.pos.x),
+                Math.round(Self.pos.y - 30));
+
     Tests.drawHitbox(ctx,
                     Math.round(Self.pos.x),
                     Math.round(Self.pos.y),
                     HITBOX.width,
                     HITBOX.height);
+
+    let cur = Events.listen('PLAYER_ATTACKBOX');
+    // console.log(cur);
+
+    if (cur) Tests.drawPlayerAttackBox(ctx,
+                    Math.round(cur.x),
+                    Math.round(cur.y),
+                    cur.range, HITBOX.height);
 
     Tests.drawCollisionPoints(ctx, false, Collision.collisionPoints);
   }

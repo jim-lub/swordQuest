@@ -3,9 +3,10 @@ const Tests = (function() {
 
   const isEnabled = {
     hitbox: true,
-    collisionPoints: true,
-    fov: true,
-    attackRadius: true
+    collisionPoints: false,
+    fov: false,
+    attackBox: true,
+    attackRadius: false
   };
 
   function drawHitbox(ctx, x, y, width, height) {
@@ -14,6 +15,16 @@ const Tests = (function() {
     ctx.save();
     ctx.globalAlpha = 0.3;
     ctx.fillStyle = "green";
+    ctx.fillRect(x, y, width, height);
+    ctx.restore();
+  }
+
+  function drawPlayerAttackBox(ctx, x, y, width, height) {
+    if (!isEnabled.attackBox) return;
+
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = "purple";
     ctx.fillRect(x, y, width, height);
     ctx.restore();
   }
@@ -60,6 +71,7 @@ const Tests = (function() {
   return {
     drawHitbox,
     drawCollisionPoints,
+    drawPlayerAttackBox,
     drawFov,
     drawAttackRadius,
     isEnabled
