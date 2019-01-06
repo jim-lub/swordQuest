@@ -2,10 +2,9 @@
 const Tests = (function() {
 
   const isEnabled = {
-    hitbox: true,
+    hitbox: false,
     collisionPoints: false,
     fov: false,
-    attackBox: true,
     attackRadius: false
   };
 
@@ -15,16 +14,6 @@ const Tests = (function() {
     ctx.save();
     ctx.globalAlpha = 0.3;
     ctx.fillStyle = "green";
-    ctx.fillRect(x, y, width, height);
-    ctx.restore();
-  }
-
-  function drawPlayerAttackBox(ctx, x, y, width, height) {
-    if (!isEnabled.attackBox) return;
-
-    ctx.save();
-    ctx.globalAlpha = 0.3;
-    ctx.fillStyle = "purple";
     ctx.fillRect(x, y, width, height);
     ctx.restore();
   }
@@ -68,12 +57,26 @@ const Tests = (function() {
     ctx.restore();
   }
 
+  function eventHandlers() {
+    const elements = [
+      ['testsuite-toggle-hitbox', 'hitbox'],
+      ['testsuite-toggle-collision-points', 'collisionPoints'],
+      ['testsuite-toggle-enemy-fov', 'fov'],
+      ['testsuite-toggle-enemy-attackradius', 'attackRadius']
+    ];
+
+    elements.forEach(cur => {
+      document.getElementById(cur[0]).onclick = function() {
+        isEnabled[cur[1]] = (this.checked) ? true : false;
+      };
+    });
+  }
+
   return {
     drawHitbox,
     drawCollisionPoints,
-    drawPlayerAttackBox,
     drawFov,
     drawAttackRadius,
-    isEnabled
+    eventHandlers
   };
 }());

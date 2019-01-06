@@ -139,31 +139,18 @@ const Player = (function() {
   }
 
   function _attack() {
-    if (self.direction === 'right') {
-      Events.emit('PLAYER_ATTACKBOX', {
-        x: Self.pos.x + HITBOX.width,
-        y: Self.pos.y,
-        range: 45,
-        cooldown: 30,
-        damage: 10
-      });
-    } else {
-      Events.emit('PLAYER_ATTACKBOX', {
-        x: Self.pos.x,
-        y: Self.pos.y,
-        range: -45,
-        cooldown: 30,
-        damage: 10
-      });
-    }
+    Events.emit('PLAYER_ATTACK', {
+      direction: self.direction, range: 50, cooldown: 30, damage: 10, knockBackForce: 50000
+    });
   }
 
   function _clearPlayerAttackBox() {
-    Events.emit('PLAYER_ATTACKBOX', {
-      x: 0,
-      y: 0,
+    Events.emit('PLAYER_ATTACK', {
+      direction: self.direction,
       range: 0,
-      cooldown: 0
+      cooldown: 0,
+      damage: 0,
+      knockBackForce: 0
     });
   }
 
@@ -223,25 +210,13 @@ const Player = (function() {
                   Math.round(Self.pos.y - HITBOX.offsetY + currentFrame.data.offsetY),
                   currentFrame.data.sWidth, currentFrame.data.sHeight);
 
-    _drawHealth(ctx, Events.listen('CAMERA_OFFSET_X') + Self.pos.x,
-                Math.round(Self.pos.x),
-                Math.round(Self.pos.y - 30));
-
     Tests.drawHitbox(ctx,
                     Math.round(Self.pos.x),
                     Math.round(Self.pos.y),
                     HITBOX.width,
                     HITBOX.height);
 
-    let cur = Events.listen('PLAYER_ATTACKBOX');
-    // console.log(cur);
-
-    if (cur) Tests.drawPlayerAttackBox(ctx,
-                    Math.round(cur.x),
-                    Math.round(cur.y),
-                    cur.range, HITBOX.height);
-
-    Tests.drawCollisionPoints(ctx, false, Collision.collisionPoints);
+    Tests.drawCollisionPoints(ctx, true, Collision.collisionPoints);
   }
 
   function init() {

@@ -49,13 +49,6 @@ const Enemy = (function() {
     render: (ctx) => {
       let currentFrame = state.animations.currentData;
 
-      Tests.drawHitbox(ctx,
-                      Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
-                      Math.round(state.pos.y),
-                      state.hitbox.width,
-                      state.hitbox.height);
-
-      Tests.drawCollisionPoints(ctx, true, state.collision.collisionPoints);
       Tests.drawFov(ctx,
                     Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
                     Math.round(state.pos.y),
@@ -81,6 +74,14 @@ const Enemy = (function() {
                     Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x + currentFrame.offsetX),
                     Math.round(state.pos.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
+
+      Tests.drawHitbox(ctx,
+                      Math.round(-Events.listen('CAMERA_OFFSET_X') + state.pos.x),
+                      Math.round(state.pos.y),
+                      state.hitbox.width,
+                      state.hitbox.height);
+
+      Tests.drawCollisionPoints(ctx, true, state.collision.collisionPoints);
     }
   });
 
@@ -111,7 +112,7 @@ const Enemy = (function() {
       if (Math.abs(state.vel.x) < FORCES.epsilon) state.vel.x = 0;
       if (Math.abs(state.vel.y) < FORCES.epsilon) state.vel.y = 0;
 
-      state.collision.update(state.id, state.pos, Vector.multiply(state.vel, dt), state.width, state.height);
+      state.collision.update(state.id, state.pos, Vector.multiply(state.vel, dt), state.hitbox.width, state.hitbox.height);
 
       if (state.collision.hit('y')) state.vel.set(state.vel.x, 0);
       if (state.collision.hit('x')) state.vel.set(0, state.vel.y);
@@ -182,13 +183,13 @@ const Enemy = (function() {
     isHitByPlayer: () => {
       state.cooldown--;
       if (state.cooldown > 0) return;
-      let box = Events.listen('PLAYER_ATTACKBOX');
-      if (box.range === 0) return;
+      let attack = Events.listen('PLAYER_ATTACK');
+      if (attack.range === 0) return;
 
-      if (state.distance < 50 && state.dirInt === Math.sign(box.range)) {
-        state.apply(new Vector(50000 * state.dirInt, 0));
-        state.health -= box.damage;
-        state.cooldown = box.cooldown;
+      if (state.distance < attack.range && state.dir !== attack.direction) {
+        state.apply(new Vector(attack.knockbackForce * state.dirInt, 0));
+        state.health -= attack.damage;
+        state.cooldown = attack.cooldown;
       }
       if (state.health <= 0) {
         // Dead
@@ -207,7 +208,9 @@ const Enemy = (function() {
     },
 
     distanceToPlayer: () => {
-      state.distance = Math.abs((state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X'))) + (Events.listen('PLAYER_HITBOX').width / 2));
+      let entityCenter = state.pos.x + state.hitbox.width / 2;
+      let playerCenter = (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')) + (Events.listen('PLAYER_HITBOX').width / 2);
+      state.distance = Math.abs(entityCenter - playerCenter);
     }
   });
 
