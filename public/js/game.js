@@ -30,6 +30,7 @@ const Game = (function() {
 
   function _update(dt) {
     Lvl.update();
+    Events.emit('ENEMIES', ENEMIES);
     Player.update(dt, ENEMIES);
 
     ENEMIES.filter(cur => {
@@ -71,10 +72,10 @@ const Game = (function() {
     Events.emit('tiles', LEVEL);
     Player.init();
 
-    ENEMIES.push(Enemy.build({x: 50, y: 100, height: 75, width: 60, mass: 400, fov: 150, radius: 90, type: 'hellishsmith'}));
-    ENEMIES.push(Enemy.build({x: 450, y: 100, height: 65, width: 50, mass: 400, fov: 200, radius: 100, type: 'swordknight'}));
-    ENEMIES.push(Enemy.build({x: 750, y: 100, height: 65, width: 50, mass: 400, fov: 200, radius: 100, type: 'swordknight'}));
-    ENEMIES.push(Enemy.build({x: 800, y: 100, height: 75, width: 60, mass: 400, fov: 150, radius: 90, type: 'hellishsmith'}));
+    ENEMIES.push(Enemy.build({id: 1, x: 50, y: 100, height: 75, width: 50, mass: 400, fov: 30, radius: 90, type: 'hellishsmith'}));
+    ENEMIES.push(Enemy.build({id: 2, x: 450, y: 100, height: 65, width: 40, mass: 400, fov: 300, radius: 100, type: 'swordknight'}));
+    ENEMIES.push(Enemy.build({id: 3, x: 700, y: 100, height: 65, width: 40, mass: 400, fov: 300, radius: 100, type: 'swordknight'}));
+    ENEMIES.push(Enemy.build({id: 4, x: 800, y: 100, height: 75, width: 50, mass: 400, fov: 300, radius: 90, type: 'hellishsmith'}));
 
     ENEMIES.forEach((cur, index) => {
       console.log(cur);

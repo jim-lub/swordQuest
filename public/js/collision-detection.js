@@ -2,13 +2,15 @@
 class CollisionDetection {
   constructor() {
     this.tiles = [];
+    this.entities = [];
     this.collisionPoints = [];
     this.x = false;
     this.y = false;
   }
 
-  update(pos, vel, width, height) {
+  update(id, pos, vel, width, height) {
     this.tiles = Events.listen('tiles');
+    this.entities = Events.listen('ENEMIES');
     this.x = false;
     this.y = false;
 
@@ -22,7 +24,25 @@ class CollisionDetection {
       if (this.boxCollision(hitboxY, tile)) this.y = true;
     });
 
+    this.entities.forEach(entity => {
+      if (entity.id != id) {
+        if (this.boxCollision(hitboxX, {
+          x: entity.pos.x,
+          y: entity.pos.y,
+          width: entity.hitbox.width,
+          height: entity.hitbox.height
+        })) this.x = true;
+        if (this.boxCollision(hitboxY, {
+          x: entity.pos.x,
+          y: entity.pos.y,
+          width: entity.hitbox.width,
+          height: entity.hitbox.height
+        })) this.y = true;
+      }
+    });
+
     this.tiles = [];
+    this.entities = [];
   }
 
   hit(axis) {

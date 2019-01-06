@@ -85,7 +85,7 @@ class Entity {
     if (Math.abs(this.velocity.x) < 0.2) this.velocity.x = 0;
     if (Math.abs(this.velocity.y) < 0.2) this.velocity.y = 0;
 
-    this.collision.update(this.pos, Vector.multiply(this.velocity, dt), this.width, this.height);
+    this.collision.update(0, {x: this.pos.x + Events.listen('CAMERA_OFFSET_X'), y: this.pos.y}, Vector.multiply(this.velocity, dt), this.width, this.height);
 
     if (this.collision.hit('y')) this.velocity.set(this.velocity.x, 0);
     if (this.collision.hit('x')) this.velocity.set(0, this.velocity.y);

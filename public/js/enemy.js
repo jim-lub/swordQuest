@@ -111,7 +111,7 @@ const Enemy = (function() {
       if (Math.abs(state.vel.x) < FORCES.epsilon) state.vel.x = 0;
       if (Math.abs(state.vel.y) < FORCES.epsilon) state.vel.y = 0;
 
-      state.collision.update(state.pos, Vector.multiply(state.vel, dt), state.width, state.height);
+      state.collision.update(state.id, state.pos, Vector.multiply(state.vel, dt), state.width, state.height);
 
       if (state.collision.hit('y')) state.vel.set(state.vel.x, 0);
       if (state.collision.hit('x')) state.vel.set(0, state.vel.y);
@@ -186,6 +186,7 @@ const Enemy = (function() {
       if (box.range === 0) return;
 
       if (state.distance < 50 && state.dirInt === Math.sign(box.range)) {
+        state.apply(new Vector(50000 * state.dirInt, 0));
         state.health -= box.damage;
         state.cooldown = box.cooldown;
       }
