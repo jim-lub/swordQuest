@@ -95,10 +95,7 @@ const Enemy = (function() {
       height: state.height
     },
     collision: new CollisionDetection(),
-    apply: (v) => {
-      let f = Vector.divide(v, state.mass);
-      state.acc.add(f);
-    },
+
     update: (dt) => {
       state.transitions[state.currentState].active();
       state.animations.play(state.currentState, state.dir);
@@ -121,6 +118,7 @@ const Enemy = (function() {
       state.pos.add(state.vel);
       state.acc.multiply(0);
     },
+
     dispatch: (actionName) => {
       const actions = state.transitions[state.currentState];
       const action = state.transitions[state.currentState][actionName];
@@ -129,10 +127,13 @@ const Enemy = (function() {
         action.apply(state);
       }
     },
+
     changeStateTo: (transition) => {
       state.currentState = transition;
     },
+
     currentState: 'idle',
+
     transitions: {
       'idle': {
         active() { state.idle(); },
@@ -150,29 +151,45 @@ const Enemy = (function() {
         run() { state.changeStateTo('run'); }
       }
     },
+
     idle: () => {
       if (Math.abs(state.vel.x) > 0) state.dispatch('run');
-      let distance = Math.abs((state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X'))) + (Events.listen('PLAYER_HITBOX').width / 2));
-      if (distance > state.radius && distance < state.fov) state.dispatch('run');
-      if (distance < state.radius) state.dispatch('attack');
+
+      state.distanceToPlayer();
+
+      if (state.distance > state.radius && state.distance < state.fov) state.dispatch('run');
+      if (state.distance < state.radius) state.dispatch('attack');
     },
+
     run: () => {
       if (Math.abs(state.vel.x) === 0) state.dispatch('idle');
 
-      let direction = Math.sign((state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X'))) + (Events.listen('PLAYER_HITBOX').width / 2));
-      let distance = Math.abs((state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X'))) + (Events.listen('PLAYER_HITBOX').width / 2));
+      state.setDirection();
+      state.distanceToPlayer();
 
-      state.dir = (direction === 1) ? 'left' : 'right';
-
-      if (distance > state.radius && distance < state.fov) state.apply(new Vector(15000 * -direction, 0));
-      if (distance < state.radius) state.dispatch('attack');
+      if (state.distance > state.radius && state.distance < state.fov) state.apply(new Vector(15000 * -state.dirInt, 0));
+      if (state.distance < state.radius) state.dispatch('attack');
     },
-    attack: () => {
-      let direction = Math.sign((state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X'))) + (Events.listen('PLAYER_HITBOX').width / 2));
-      let distance = Math.abs((state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X'))) + (Events.listen('PLAYER_HITBOX').width / 2));
 
+    attack: () => {
+      state.setDirection();
+      state.distanceToPlayer();
+      if (state.distance > state.radius) state.dispatch('idle');
+    },
+
+    apply: (v) => {
+      let f = Vector.divide(v, state.mass);
+      state.acc.add(f);
+    },
+
+    setDirection: () => {
+      let direction = Math.sign((state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X'))) + (Events.listen('PLAYER_HITBOX').width / 2));
+      state.dirInt = direction;
       state.dir = (direction === 1) ? 'left' : 'right';
-      if (distance > state.radius) state.dispatch('idle');
+    },
+
+    distanceToPlayer: () => {
+      state.distance = Math.abs((state.pos.x - (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X'))) + (Events.listen('PLAYER_HITBOX').width / 2));
     }
   });
 
