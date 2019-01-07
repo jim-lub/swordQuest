@@ -169,13 +169,28 @@ const Enemy = (function() {
       if (attack.range === 0) return;
 
       if (state.distance < attack.range && state.dir !== attack.direction) {
-        state.apply(new Vector(attack.knockbackForce * state.dirInt, 0));
-        state.health -= attack.damage;
+        if (state.isCriticalHit(attack.critchance)) {
+          state.apply(new Vector(attack.knockbackForce * state.dirInt, 0));
+          state.health -= attack.damage * state.calculateDamage();
+        }
+        state.health -= attack.damage * state.calculateDamage();
         state.cooldown = attack.cooldown;
       }
       if (state.health <= 0) {
         // Dead
       }
+    },
+
+    calculateDamage: () => {
+      let rand = Math.floor((Math.random() * 10) + 1);
+
+      return rand / 5;
+    },
+
+    isCriticalHit: (critchance) => {
+      let rand = Math.floor((Math.random() * 100) + 1);
+
+      return rand < critchance;
     },
 
     apply: (v) => {

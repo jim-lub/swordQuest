@@ -1,9 +1,10 @@
 /* jshint esversion: 6 */
-const Events = (function() {
+const Fx = (function() {
 
-  const events = {};
+  const backgroundLayer = [];
+  const foregroundLayer = [];
 
-  function emit(eventID, data) {
+  function add(event, data) {
     events[eventID] = data;
   }
 
@@ -16,7 +17,6 @@ const Events = (function() {
   }
 
   return {
-    emit,
-    listen
+    add
   };
 }());

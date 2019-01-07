@@ -110,4 +110,8 @@ class PlayerAnimations {
     };
   }
 
+  getCurrentTickCount() {
+    return this.tickCount;
+  }
+
 }

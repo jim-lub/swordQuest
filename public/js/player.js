@@ -78,7 +78,7 @@ const Player = (function() {
       _attack();
     } else {
       Animations.play('idle', self.direction);
-      _clearPlayerAttackBox();
+      _nullifyPlayerAttack();
     }
 
     if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) _machine.dispatch('run');
@@ -91,7 +91,7 @@ const Player = (function() {
       _attack();
     } else {
       Animations.play('run', self.direction);
-      _clearPlayerAttackBox();
+      _nullifyPlayerAttack();
     }
 
     if (Ctrls.isPressed('space')) _machine.dispatch('jump');
@@ -110,7 +110,7 @@ const Player = (function() {
       _attack();
     } else {
       Animations.play('jump', self.direction);
-      _clearPlayerAttackBox();
+      _nullifyPlayerAttack();
     }
 
     if (Collision.hit('y')) {
@@ -126,7 +126,7 @@ const Player = (function() {
       _attack();
     } else {
       Animations.play('fall', self.direction);
-      _clearPlayerAttackBox();
+      _nullifyPlayerAttack();
     }
     if (!Collision.hit('y')) {
       if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
@@ -139,18 +139,26 @@ const Player = (function() {
   }
 
   function _attack() {
-    Events.emit('PLAYER_ATTACK', {
-      direction: self.direction, range: 50, cooldown: 30, damage: 10, knockBackForce: 50000
-    });
+    let tickcount = Animations.getCurrentTickCount();
+
+    // Link sword hits to the animation by only emitting hits when the sword is visually in front of the player
+    if (tickcount > 11 && tickcount < 24) {
+      Events.emit('PLAYER_ATTACK', {
+        direction: self.direction, range: 50, cooldown: 30, damage: 10, critchance: 20, knockbackForce: 150000
+      });
+    } else {
+      _nullifyPlayerAttack();
+    }
   }
 
-  function _clearPlayerAttackBox() {
+  function _nullifyPlayerAttack() {
     Events.emit('PLAYER_ATTACK', {
       direction: self.direction,
       range: 0,
       cooldown: 0,
       damage: 0,
-      knockBackForce: 0
+      critchance: 0,
+      knockbackForce: 0
     });
   }
 
