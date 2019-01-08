@@ -1,6 +1,7 @@
 /* jshint esversion: 6 */
-
 const Entity = (function() {
+  const Ctrls = new Controls();
+
   let ENTITIES = [];
   let ATTACKS = [];
 
@@ -43,7 +44,7 @@ const Entity = (function() {
       direction: player.direction || 'right'
     };
 
-    return Object.assign(state, ...[_entity(state), _render(state)]);
+    return Object.assign(state, ...[_entity(state), _render(state), _player(state)]);
   }
 
   function _createNpc(npc) {
@@ -61,7 +62,7 @@ const Entity = (function() {
       direction: npc.direction || 'right'
     };
 
-    return Object.assign(state, ...[_entity(state), _render(state)]);
+    return Object.assign(state, ...[_entity(state), _render(state), _melee(state)]);
   }
 
   const _entity = (state) => ({
@@ -71,16 +72,33 @@ const Entity = (function() {
     collision: new CollisionDetection(),
 
     update: (dt) => {
-      state.animations.play('idle', state.direction);
+      state.transitions[state.currentState].active();
+      state.animations.play(state.currentState, state.direction);
 
       // state.applyForce(new Vector(5000, 0));
-      
+      if (Ctrls.isPressed('space')) state.dispatch('attack');
+
       _updatePhysics(state, dt);
     },
 
     applyForce: (vector) => {
       let force = Vector.divide(vector, state.mass);
       state.acceleration.add(force);
+    },
+
+    currentState: 'idle',
+
+    dispatch: (actionName) => {
+      const actions = state.transitions[state.currentState];
+      const action = state.transitions[state.currentState][actionName];
+
+      if (action) {
+        action.apply(state);
+      }
+    },
+
+    changeStateTo: (transition) => {
+      state.currentState = transition;
     }
   });
 
@@ -100,6 +118,79 @@ const Entity = (function() {
                     currentFrame.sWidth, currentFrame.sHeight);
     }
   });
+
+  /*****************************
+  * FSM
+  ******************************/
+  const _player = (state) => ({
+    transitions: {
+      'idle': {
+        active() { _idle(state); },
+        run() { state.changeStateTo('run'); },
+        jump() { state.changeStateTo('jump'); },
+        fall() { state.changeStateTo('fall'); }
+      },
+      'run': {
+        active() { _run(state); },
+        idle() { state.changeStateTo('idle'); },
+        jump() {state.changeStateTo('jump'); },
+        fall() { state.changeStateTo('fall'); }
+      },
+      'jump': {
+        active() { _jump(state); },
+        fall() { state.changeStateTo('fall'); }
+      },
+      'fall': {
+        active() { _fall(state); },
+        idle() { state.changeStateTo('idle'); }
+      }
+    }
+  });
+
+  const _melee = (state) => ({
+    transitions: {
+      'idle': {
+        active() { _idle(state); },
+        run() { state.changeStateTo('run'); },
+        attack() { state.changeStateTo('attack'); }
+      },
+      'run': {
+        active() { _run(state); },
+        idle() { state.changeStateTo('idle'); },
+        attack() { state.changeStateTo('attack'); }
+      },
+      'attack': {
+        active() { _attack(state); },
+        idle() { state.changeStateTo('idle'); },
+        run() { state.changeStateTo('run'); }
+      }
+    }
+  });
+
+  /*****************************
+  * Actions
+  ******************************/
+  function _idle(state) {
+    if (Math.abs(state.velocity.x) > 0) state.dispatch('run');
+
+    if (_getPlayerID() === state.id) {
+      if (Ctrls.isPressed('a')) state.applyForce(new Vector(-15000, 0));
+      if (Ctrls.isPressed('d')) state.applyForce(new Vector(15000, 0));
+    }
+  }
+
+  function _run(state) {
+    if (Math.abs(state.velocity.x) === 0) state.dispatch('idle');
+
+    if (_getPlayerID() === state.id) {
+      if (Ctrls.isPressed('a')) state.applyForce(new Vector(-15000, 0));
+      if (Ctrls.isPressed('d')) state.applyForce(new Vector(15000, 0));
+    }
+  }
+
+  function _attack() {
+
+  }
 
 
   /*****************************
@@ -153,6 +244,13 @@ const Entity = (function() {
     return 0;
   }
 
+  function _updateDirection(state) {
+    if (_getPlayerID() === state.id) {
+      state.directionInt = 0;
+      state.direction = (direction === 1) ? 'left' : 'right';
+    }
+  }
+
   function _generateRandomID() {
     return Math.floor(Math.random() * 100 * Math.random() * 100 * Math.random() * 100 * Math.random() * 100);
   }
@@ -165,104 +263,3 @@ const Entity = (function() {
     init, update, render
   };
 }());
-
-
-/*****************************
-*
-******************************/
-class Tile {
-  constructor(object) {
-    this.x = object.x;
-    this.y = object.y;
-    this.width = object.width;
-    this.height = object.height;
-  }
-}
-
-
-/*****************************
-*
-******************************/
-class Entity2 {
-  constructor(object) {
-    this.mass = object.mass;
-    this.width = object.width;
-    this.height = object.height;
-    this.pos = new Vector(object.x, object.y);
-    this.velocity = new Vector(0, 0);
-    this.acceleration = new Vector(0, 0);
-    this.collision = new CollisionDetection();
-    this.vAcc = 0;
-
-    this.F = {
-      epsilon: 0.1,
-      gravity: 9.81,
-      friction: -0.99,
-      drag: -0.05
-    };
-  }
-
-  apply(v) {
-    let f = Vector.divide(v, this.mass);
-    this.acceleration.add(f);
-  }
-
-  _gravity() {
-    let f = new Vector(0, (this.F.gravity * (this.mass * 12)));
-    return f;
-  }
-
-  _friction() {
-    let f = this.velocity.clone();
-    f.normalize();
-    f.multiply(this.F.friction);
-    return f;
-  }
-
-  _drag() {
-    let f = this.velocity.clone();
-    let speed = this.velocity.mag();
-    f.normalize();
-    f.multiply(this.F.drag * speed * speed);
-    return f;
-  }
-
-  jump() {
-    this.vAcc = 50000;
-  }
-
-  XY(v) {
-    return {
-      x: this[v].x,
-      y: this[v].y
-    };
-  }
-
-  update(dt) {
-    this.apply(this._friction());
-    this.apply(this._drag());
-    if (this.vAcc > 0) {
-      this.apply(new Vector(0, -this.vAcc));
-      this.vAcc *= 0.92;
-    }
-    if (this.vAcc < 1000) this.vAcc = 0;
-    this.apply(this._gravity());
-
-    this.velocity.add(this.acceleration);
-
-    if (Math.abs(this.velocity.x) < 0.2) this.velocity.x = 0;
-    if (Math.abs(this.velocity.y) < 0.2) this.velocity.y = 0;
-
-    this.collision.update(0, {x: this.pos.x + Events.listen('CAMERA_OFFSET_X'), y: this.pos.y}, Vector.multiply(this.velocity, dt), this.width, this.height);
-
-    if (this.collision.hit('y')) this.velocity.set(this.velocity.x, 0);
-    if (this.collision.hit('x')) this.velocity.set(0, this.velocity.y);
-
-    this.velocity.multiply(dt);
-
-    this.pos.add(this.velocity);
-    if (Events.listen('PLAYER_HIT_LEFT_WALL') || Events.listen('PLAYER_HIT_RIGHT_WALL')) this.pos.set((this.pos.x - this.velocity.x), this.pos.y);
-
-    this.acceleration.multiply(0);
-  }
-}
