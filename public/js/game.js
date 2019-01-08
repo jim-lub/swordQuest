@@ -43,7 +43,10 @@ const Game = (function() {
       cur.update(dt);
     });
 
+    // console.log(Events.listen('ATTACKS'));
+
     Cam.update(Player.getPosition(), Player.getVelocity(), Player.getDirection());
+    Events.emit('ATTACKS', []);
     Events.emit('tiles', LEVEL);
   }
 
@@ -75,12 +78,13 @@ const Game = (function() {
       spacingX += 32;
     }
     Events.emit('tiles', LEVEL);
+    Events.emit('ATTACKS', []);
     Player.init();
 
     ENEMIES.push(Enemy.build({id: 1, x: 50, y: 100, height: 75, width: 40, mass: 400, fov: 220, radius: 90, type: 'hellishsmith'}));
-    ENEMIES.push(Enemy.build({id: 2, x: 450, y: 100, height: 75, width: 40, mass: 400, fov: 220, radius: 100, type: 'hellishsmith'}));
-    ENEMIES.push(Enemy.build({id: 3, x: 500, y: 100, height: 65, width: 40, mass: 400, fov: 220, radius: 100, type: 'swordknight'}));
-    ENEMIES.push(Enemy.build({id: 4, x: 600, y: 100, height: 75, width: 40, mass: 400, fov: 220, radius: 100, type: 'hellishsmith'}));
+    // ENEMIES.push(Enemy.build({id: 2, x: 450, y: 100, height: 75, width: 40, mass: 400, fov: 220, radius: 100, type: 'hellishsmith'}));
+    // ENEMIES.push(Enemy.build({id: 3, x: 500, y: 100, height: 65, width: 40, mass: 400, fov: 220, radius: 100, type: 'swordknight'}));
+    // ENEMIES.push(Enemy.build({id: 4, x: 600, y: 100, height: 75, width: 40, mass: 400, fov: 220, radius: 100, type: 'hellishsmith'}));
     ENEMIES.push(Enemy.build({id: 5, x: 700, y: 100, height: 65, width: 40, mass: 400, fov: 220, radius: 100, type: 'swordknight'}));
     ENEMIES.push(Enemy.build({id: 6, x: 800, y: 100, height: 75, width: 40, mass: 400, fov: 220, radius: 90, type: 'hellishsmith'}));
 

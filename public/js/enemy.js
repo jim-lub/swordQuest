@@ -83,6 +83,7 @@ const Enemy = (function() {
     update: (dt) => {
       state.transitions[state.currentState].active();
       state.animations.play(state.currentState, state.dir);
+      state.calculateDistanceToPlayer();
       state.isHitByPlayer();
 
       _apply(state, _gravity(state));
@@ -140,8 +141,6 @@ const Enemy = (function() {
     idle: () => {
       if (Math.abs(state.vel.x) > 0) state.dispatch('run');
 
-      state.distanceToPlayer();
-
       if (state.distance > state.radius && state.distance < state.fov) state.dispatch('run');
       if (state.distance < state.radius) state.dispatch('attack');
     },
@@ -150,7 +149,6 @@ const Enemy = (function() {
       if (Math.abs(state.vel.x) === 0) state.dispatch('idle');
 
       state.setDirection();
-      state.distanceToPlayer();
 
       if (state.distance > state.radius && state.distance < state.fov) state.apply(new Vector(15000 * -state.dirInt, 0));
       if (state.distance < state.radius) state.dispatch('attack');
@@ -158,8 +156,19 @@ const Enemy = (function() {
 
     attack: () => {
       state.setDirection();
-      state.distanceToPlayer();
       if (state.distance > state.radius) state.dispatch('idle');
+
+      let posX = (state.dir === 'left') ? state.pos.x - state.radius : state.pos.x + state.hitbox.width;
+
+      let attack = [{
+        id: state.id,
+        x: (posX - Events.listen('CAMERA_OFFSET_X')),
+        y: state.pos.y,
+        width: state.radius,
+        height: state.hitbox.height
+      }];
+
+      Events.emit('ATTACKS', [...Events.listen('ATTACKS'), ...attack]);
     },
 
     isHitByPlayer: () => {
@@ -169,11 +178,13 @@ const Enemy = (function() {
       if (attack.range === 0) return;
 
       if (state.distance < attack.range && state.dir !== attack.direction) {
+        state.apply(new Vector(0, -100000));
+
         if (state.isCriticalHit(attack.critchance)) {
           state.apply(new Vector(attack.knockbackForce * state.dirInt, 0));
-          state.health -= attack.damage * state.calculateDamage();
+          state.health -= Math.floor(attack.damage * state.calculateDamageMultiplier());
         }
-        state.health -= attack.damage * state.calculateDamage();
+        state.health -= Math.floor(attack.damage * state.calculateDamageMultiplier());
         state.cooldown = attack.cooldown;
       }
       if (state.health <= 0) {
@@ -181,10 +192,8 @@ const Enemy = (function() {
       }
     },
 
-    calculateDamage: () => {
-      let rand = Math.floor((Math.random() * 10) + 1);
-
-      return rand / 5;
+    calculateDamageMultiplier: () => {
+      return 1 + Math.random();
     },
 
     isCriticalHit: (critchance) => {
@@ -204,7 +213,7 @@ const Enemy = (function() {
       state.dir = (direction === 1) ? 'left' : 'right';
     },
 
-    distanceToPlayer: () => {
+    calculateDistanceToPlayer: () => {
       let entityCenter = state.pos.x + state.hitbox.width / 2;
       let playerCenter = (Events.listen('PLAYER_POSITION').x + Events.listen('CAMERA_OFFSET_X')) + (Events.listen('PLAYER_HITBOX').width / 2);
       state.distance = Math.abs(entityCenter - playerCenter);

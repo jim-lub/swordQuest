@@ -18,6 +18,10 @@ const Player = (function() {
     height: 35
   };
 
+  const STATS = {
+    health: 500
+  };
+
   const Self = new Entity({
     x: DEFAULTS.pos.x,
     y: DEFAULTS.pos.y,
@@ -144,7 +148,7 @@ const Player = (function() {
     // Link sword hits to the animation by only emitting hits when the sword is visually in front of the player
     if (tickcount > 11 && tickcount < 24) {
       Events.emit('PLAYER_ATTACK', {
-        direction: self.direction, range: 50, cooldown: 30, damage: 10, critchance: 20, knockbackForce: 150000
+        direction: self.direction, range: 70, cooldown: 30, damage: 5, critchance: 50, knockbackForce: 150000
       });
     } else {
       _nullifyPlayerAttack();
@@ -160,6 +164,20 @@ const Player = (function() {
       critchance: 0,
       knockbackForce: 0
     });
+  }
+
+  function _checkForIncomingAttacks(x, y) {
+
+    let attacksWithinRange = Events.listen('ATTACKS').filter(cur => {
+      let xLeft = cur.x;
+      let xRight = cur.x + cur.width;
+      let yTop = cur.y;
+      let yBottom = cur.y + cur.height;
+      console.log((x > xLeft && x < xRight) && (y > yTop && y < yBottom));
+      return (x > xLeft && x < xRight) && (y > yTop && y < yBottom);
+    });
+
+    // console.log(attacksWithinRange);
   }
 
   function _setPlayerDirection() {
@@ -189,13 +207,14 @@ const Player = (function() {
   function _drawHealth(ctx, health, x, y) {
     ctx.save();
     ctx.fillStyle = "red";
-    ctx.font = "10px Arial";
-    ctx.fillText(health, x, y);
+    ctx.font = "25px Arial";
+    ctx.fillText('Player Health: ' + health, x, y);
     ctx.restore();
   }
 
   function update(dt, ENEMIES) {
     _setPlayerDirection();
+    _checkForIncomingAttacks(Self.pos.x, Self.pos.y);
 
     Events.emit('PLAYER_POSITION', Self.pos);
     Events.emit('PLAYER_HITBOX', HITBOX);
@@ -218,11 +237,22 @@ const Player = (function() {
                   Math.round(Self.pos.y - HITBOX.offsetY + currentFrame.data.offsetY),
                   currentFrame.data.sWidth, currentFrame.data.sHeight);
 
+    _drawHealth(ctx, STATS.health, 20, 40);
+
     Tests.drawHitbox(ctx,
                     Math.round(Self.pos.x),
                     Math.round(Self.pos.y),
                     HITBOX.width,
                     HITBOX.height);
+
+    Events.listen('ATTACKS').forEach(cur => {
+      Tests.drawHitbox(ctx,
+        Math.round(cur.x),
+        Math.round(cur.y),
+        cur.width,
+        cur.height);
+    });
+
 
     Tests.drawCollisionPoints(ctx, true, Collision.collisionPoints);
   }
