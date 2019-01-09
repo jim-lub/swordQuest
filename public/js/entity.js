@@ -22,9 +22,9 @@ const Entity = (function() {
 
   function init({player, npcs}) {
 
-    player.forEach(player => ENTITIES.push(_createPlayer(player)));
-
     npcs.forEach(npc => ENTITIES.push(_createNpc(npc)));
+
+    player.forEach(player => ENTITIES.push(_createPlayer(player)));
 
     console.log(ENTITIES);
   }
@@ -58,6 +58,8 @@ const Entity = (function() {
         width: npc.width,
         height: npc.height
       },
+      fov: 150,
+      radius: 75,
       mass: npc.mass || 400,
       direction: npc.direction || 'right'
     };
@@ -76,7 +78,10 @@ const Entity = (function() {
       state.animations.play(state.currentState, state.direction);
 
       // state.applyForce(new Vector(5000, 0));
-      if (Ctrls.isPressed('space')) state.dispatch('attack');
+      if (Ctrls.isPressed('space')) {
+        // console.log(state.direction);
+        state.dispatch('attack');
+      }
 
       _updatePhysics(state, dt);
     },
@@ -108,14 +113,20 @@ const Entity = (function() {
     render: (ctx) => {
       let currentFrame = state.animations.currentData;
 
+      Tests.drawFov(ctx, Math.round(_convertToRelativeCoordinate(state.position.x)), Math.round(state.position.y), state.hitbox.width, state.hitbox.height, state.fov);
+      Tests.drawAttackRadius(ctx, Math.round(_convertToRelativeCoordinate(state.position.x)), Math.round(state.position.y), state.hitbox.width, state.hitbox.height, state.radius);
+
       ctx.drawImage(state.animations.currentSprite,
                     currentFrame.sX,
                     currentFrame.sY,
                     currentFrame.sWidth,
                     currentFrame.sHeight,
-                    Math.round(-Events.listen('CAMERA_OFFSET_X') + state.position.x + currentFrame.offsetX),
+                    Math.round(_convertToRelativeCoordinate(state.position.x) + currentFrame.offsetX),
                     Math.round(state.position.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
+
+      Tests.drawHitbox(ctx, Math.round(_convertToRelativeCoordinate(state.position.x)), Math.round(state.position.y), state.hitbox.width, state.hitbox.height);
+      Tests.drawCollisionPoints(ctx, true, state.collision.collisionPoints);
     }
   });
 
@@ -125,23 +136,23 @@ const Entity = (function() {
   const _player = (state) => ({
     transitions: {
       'idle': {
-        active() { _idle(state); },
+        active() { _idlePLAYER(state); },
         run() { state.changeStateTo('run'); },
         jump() { state.changeStateTo('jump'); },
         fall() { state.changeStateTo('fall'); }
       },
       'run': {
-        active() { _run(state); },
+        active() { _runPLAYER(state); },
         idle() { state.changeStateTo('idle'); },
         jump() {state.changeStateTo('jump'); },
         fall() { state.changeStateTo('fall'); }
       },
       'jump': {
-        active() { _jump(state); },
+        active() { _jumpPLAYER(state); },
         fall() { state.changeStateTo('fall'); }
       },
       'fall': {
-        active() { _fall(state); },
+        active() { _fallPLAYER(state); },
         idle() { state.changeStateTo('idle'); }
       }
     }
@@ -150,17 +161,17 @@ const Entity = (function() {
   const _melee = (state) => ({
     transitions: {
       'idle': {
-        active() { _idle(state); },
+        active() { _idleNPC(state); },
         run() { state.changeStateTo('run'); },
         attack() { state.changeStateTo('attack'); }
       },
       'run': {
-        active() { _run(state); },
+        active() { _runNPC(state); },
         idle() { state.changeStateTo('idle'); },
         attack() { state.changeStateTo('attack'); }
       },
       'attack': {
-        active() { _attack(state); },
+        active() { _attackNPC(state); },
         idle() { state.changeStateTo('idle'); },
         run() { state.changeStateTo('run'); }
       }
@@ -168,28 +179,61 @@ const Entity = (function() {
   });
 
   /*****************************
-  * Actions
+  * Actions -- PLAYER
   ******************************/
-  function _idle(state) {
+  function _idlePLAYER(state) {
     if (Math.abs(state.velocity.x) > 0) state.dispatch('run');
 
     if (_getPlayerID() === state.id) {
-      if (Ctrls.isPressed('a')) state.applyForce(new Vector(-15000, 0));
-      if (Ctrls.isPressed('d')) state.applyForce(new Vector(15000, 0));
+      if (Ctrls.isPressed('a')) state.applyForce(new Vector(-25000, 0));
+      if (Ctrls.isPressed('d')) state.applyForce(new Vector(25000, 0));
     }
   }
 
-  function _run(state) {
+  function _runPLAYER(state) {
     if (Math.abs(state.velocity.x) === 0) state.dispatch('idle');
 
     if (_getPlayerID() === state.id) {
-      if (Ctrls.isPressed('a')) state.applyForce(new Vector(-15000, 0));
-      if (Ctrls.isPressed('d')) state.applyForce(new Vector(15000, 0));
+      if (Ctrls.isPressed('a')) state.applyForce(new Vector(-25000, 0));
+      if (Ctrls.isPressed('d')) state.applyForce(new Vector(25000, 0));
     }
   }
 
-  function _attack() {
+  function _attackPLAYER(state) {
 
+  }
+
+  /*****************************
+  * Actions -- NPC
+  ******************************/
+  function _idleNPC(state) {
+    if (Math.abs(state.velocity.x) > 0) state.dispatch('run');
+
+    _updateDirection(state);
+
+    let distance = _distanceToPlayer(state);
+
+    if (distance > state.radius && distance < state.fov) state.dispatch('run');
+    if (distance < state.radius) state.dispatch('attack');
+  }
+
+  function _runNPC(state) {
+    if (Math.abs(state.velocity.x) === 0) state.dispatch('idle');
+
+    _updateDirection(state);
+
+    let distance = _distanceToPlayer(state);
+
+    if (distance > state.radius && distance < state.fov) state.applyForce(new Vector(15000 * -state.directionInt, 0));
+    if (distance < state.radius) state.dispatch('attack');
+  }
+
+  function _attackNPC(state) {
+    _updateDirection(state);
+
+    let distance = _distanceToPlayer(state);
+
+    if (distance > state.radius) state.dispatch('idle');
   }
 
 
@@ -199,7 +243,7 @@ const Entity = (function() {
   function _updatePhysics(state, dt) {
     state.applyForce(_gravity(state));
     state.applyForce(_friction(state));
-    state.applyForce(_drag(state));
+    // state.applyForce(_drag(state));
 
     state.velocity.add(state.acceleration);
 
@@ -244,11 +288,43 @@ const Entity = (function() {
     return 0;
   }
 
+  function _getPlayerCoordindates() {
+    let player = ENTITIES.filter(cur => {
+      return cur.id === _getPlayerID();
+    });
+
+    return player[0].position;
+  }
+
+  function _getPlayerData() {
+    let player = ENTITIES.filter(cur => {
+      return cur.id === _getPlayerID();
+    });
+
+    return player[0];
+  }
+
+  function _convertToRelativeCoordinate(coordinate) { return coordinate + -Events.listen('CAMERA_OFFSET_X');}
+
+  function _convertToBaseCoordinate(coordinate) { return coordinate + Events.listen('CAMERA_OFFSET_X');}
+
   function _updateDirection(state) {
     if (_getPlayerID() === state.id) {
       state.directionInt = 0;
       state.direction = (direction === 1) ? 'left' : 'right';
+    } else {
+      let direction = Math.sign(state.position.x - _getPlayerCoordindates().x);
+      state.directionInt = direction;
+      state.direction = (direction === 1) ? 'left' : 'right';
     }
+  }
+
+  function _distanceToPlayer(state) {
+    let player = _getPlayerData();
+    let entityCenter = state.position.x + state.hitbox.width / 2;
+    let playerCenter = player.position.x + player.hitbox.width / 2;
+
+    return Math.abs(entityCenter - playerCenter);
   }
 
   function _generateRandomID() {

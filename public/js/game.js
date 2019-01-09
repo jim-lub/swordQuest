@@ -85,12 +85,12 @@ const Game = (function() {
 
     Entity.init({
       player: [
-        {type: 'hero', width: 30, height: 30, health: 100, x: 400, y: 300}
+        {type: 'hero', width: 32, height: 35, health: 100, x: 400, y: 300}
       ],
       npcs: [
-        {type: 'hellishsmith', width: 40, height: 75, health: 150, x: 100, y: 200, mass: 100},
-        {type: 'swordknight', width: 40, height: 65, health: 250, x: 300, y: 200, mass: 800},
-        {type: 'hellishsmith', width: 40, height: 75, health: 50, x: 500, y: 200, mass: 400}
+        {type: 'hellishsmith', width: 40, height: 75, health: 150, x: 100, y: 200, mass: 600},
+        {type: 'swordknight', width: 40, height: 65, health: 250, x: 300, y: 200, mass: 700},
+        {type: 'hellishsmith', width: 40, height: 75, health: 50, x: 500, y: 200, mass: 600}
       ]
     });
 
