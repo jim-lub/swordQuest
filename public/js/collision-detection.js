@@ -10,7 +10,7 @@ class CollisionDetection {
 
   update(id, pos, vel, width, height) {
     this.tiles = Events.listen('tiles');
-    this.entities = Events.listen('ENEMIES');
+    this.entities = Characters.ENTITIES;
     this.x = false;
     this.y = false;
 
@@ -27,14 +27,14 @@ class CollisionDetection {
     this.entities.forEach(entity => {
       if (entity.id != id) {
         if (this.boxCollision(hitboxX, {
-          x: entity.pos.x,
-          y: entity.pos.y,
+          x: entity.position.x,
+          y: entity.position.y,
           width: entity.hitbox.width,
           height: entity.hitbox.height
         })) this.x = true;
         if (this.boxCollision(hitboxY, {
-          x: entity.pos.x,
-          y: entity.pos.y,
+          x: entity.position.x,
+          y: entity.position.y,
           width: entity.hitbox.width,
           height: entity.hitbox.height
         })) this.y = true;
@@ -95,6 +95,14 @@ class CollisionDetection {
         x: pos.x + vel.x + width,
         y: pos.y + vel.y + height / 2
       },
+      {
+        x: pos.x + vel.x + width / 2,
+        y: pos.y + vel.y
+      },
+      {
+        x: pos.x + vel.x + width / 2,
+        y: pos.y + vel.y + height
+      }
     ];
   }
 }

@@ -39,11 +39,11 @@
         "sHeight": 70,
         "offsetX": {
           "left": -10,
-          "right": 0
+          "right": -10
         },
         "offsetY": {
-          "left": 0,
-          "right": 0
+          "left": -36,
+          "right": -36
         }
       },
       "run": {
@@ -67,8 +67,8 @@
           "right": 0
         },
         "offsetY": {
-          "left": 0,
-          "right": 0
+          "left": -36,
+          "right": -36
         }
       },
       "jump": {
@@ -92,8 +92,8 @@
           "right": 3
         },
         "offsetY": {
-          "left": 1,
-          "right": 1
+          "left": -36,
+          "right": -36
         }
       },
       "fall": {
@@ -117,8 +117,8 @@
           "right": 1
         },
         "offsetY": {
-          "left": 2,
-          "right": 2
+          "left": -36,
+          "right": -36
         }
       },
       "attack": {
@@ -142,8 +142,8 @@
           "right": 1
         },
         "offsetY": {
-          "left": 1,
-          "right": 1
+          "left": -36,
+          "right": -36
         }
       },
       "attack_run": {
@@ -167,8 +167,8 @@
           "right": 1
         },
         "offsetY": {
-          "left": 0,
-          "right": 0
+          "left": -36,
+          "right": -36
         }
       },
       "attack_jump": {
@@ -192,8 +192,8 @@
           "right": -2
         },
         "offsetY": {
-          "left": 1,
-          "right": 1
+          "left": -36,
+          "right": -36
         }
       }
     }

@@ -22,7 +22,7 @@ const Player = (function() {
     health: 500
   };
 
-  const Self = new Entity({
+  const Self = new Entity2({
     x: DEFAULTS.pos.x,
     y: DEFAULTS.pos.y,
     width: HITBOX.width,

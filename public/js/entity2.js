@@ -15,7 +15,7 @@ class Tile {
 /*****************************
 *
 ******************************/
-class Entity {
+class Entity2 {
   constructor(object) {
     this.mass = object.mass;
     this.width = object.width;
