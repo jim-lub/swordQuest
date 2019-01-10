@@ -13,11 +13,16 @@ const Characters = (function() {
   };
 
   function update(dt) {
+    _loopOverAttacks();
+    _filterOutofBoundsAttacks();
+
     ENTITIES.forEach(entity => entity.update(dt));
   }
 
   function render(ctx) {
     ENTITIES.forEach(entity => entity.render(ctx));
+
+    Tests.drawAttacks(ctx, ATTACKS);
   }
 
   function init({player, npcs}) {
@@ -41,6 +46,7 @@ const Characters = (function() {
         width: player.width,
         height: player.height
       },
+      radius: 40,
       mass: player.mass || 200,
       direction: player.direction || 'right'
     };
@@ -53,6 +59,7 @@ const Characters = (function() {
       id: _generateRandomID(),
       isPlayerControlled: false,
       isAttacking: false,
+      attackCooldown: null,
       type: npc.type,
       startPosition: {x: npc.x, y: npc.y},
       health: npc.health || 100,
@@ -175,7 +182,7 @@ const Characters = (function() {
     idle: () => {
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack', state.direction);
-        // _attack();
+        _attack(state);
       } else {
         state.animations.play('idle', state.direction);
       }
@@ -187,7 +194,7 @@ const Characters = (function() {
     run: () => {
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_run', state.direction);
-        // _attack();
+        _attack(state);
       } else {
         state.animations.play('run', state.direction);
       }
@@ -204,7 +211,7 @@ const Characters = (function() {
     jump: () => {
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_jump', state.direction);
-        // _attack();
+        _attack(state);
       } else {
         state.animations.play('jump', state.direction);
       }
@@ -220,7 +227,7 @@ const Characters = (function() {
     fall: () => {
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_jump', state.direction);
-        // _attack();
+        _attack(state);
       } else {
         state.animations.play('fall', state.direction);
       }
@@ -286,12 +293,81 @@ const Characters = (function() {
     attack: () => {
       _updateDirection(state);
 
+      state.attackCooldown--;
+      if (state.attackCooldown <= 0) {
+        _attack(state);
+        state.attackCooldown = 10;
+      }
+
       let distance = _distanceToPlayer(state);
 
       if (distance > state.radius) state.dispatch('idle');
     },
   });
 
+  /********************************************************************************
+  * @Combat
+  * @
+  * @
+  ********************************************************************************/
+  function _attack(state) {
+    let x = state.position.x;
+    let y = state.position.y;
+    let dir = state.direction;
+    let radius = state.radius;
+
+    let attackStartPosY = (y + state.hitbox.height) - radius;
+
+    let newAttack = {
+      position: new Vector(x + (state.hitbox.width / 2), attackStartPosY),
+      time: 10,
+      speed: 5,
+      direction: dir,
+      radius: radius
+    };
+
+    let newAttack2 = {
+      position: new Vector(x + (state.hitbox.width / 2), attackStartPosY),
+      time: 10,
+      speed: 2.5,
+      direction: dir,
+      radius: radius
+    };
+
+    let newAttack3 = {
+      position: new Vector(x + (state.hitbox.width / 2), attackStartPosY),
+      time: 15,
+      speed: 2,
+      direction: dir,
+      radius: radius
+    };
+
+    ATTACKS.push(newAttack);
+    ATTACKS.push(newAttack2);
+    ATTACKS.push(newAttack3);
+  }
+
+  function _filterOutofBoundsAttacks() {
+
+    let newArray = ATTACKS.filter(cur => {
+      return (cur.time > 0);
+    })
+    .filter(cur => {
+      return (_convertToRelativeCoordinate(cur.position.x) > 0 && _convertToRelativeCoordinate(cur.position.x) < 900 && cur.position.y > 0 && cur.position.y < 640);
+    });
+
+    ATTACKS = newArray;
+  }
+
+  function _loopOverAttacks() {
+    ATTACKS.forEach(cur => {
+      cur.time--;
+      let speed = (cur.radius * 0.1) * cur.speed * ((cur.time) * 0.05);
+      let x = (cur.direction === 'left') ? -speed : speed;
+      let y = (cur.radius * 0.1) * cur.speed * ((11 - cur.time) * 0.05);
+      cur.position.add(new Vector(x, y));
+    });
+  }
 
   /*****************************
   * Physics

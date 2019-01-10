@@ -46,7 +46,7 @@ const Game = (function() {
     ctx.fillStyle = 'black';
     ctx.globalAlpha = 0.2;
     LEVEL.forEach(cur => {
-      ctx.fillRect(cur.x - Events.listen('CAMERA_OFFSET_X'), cur.y, cur.width, cur.height);
+      ctx.fillRect(cur.x, cur.y, cur.width, cur.height);
     });
     ctx.globalAlpha = 1;
   }

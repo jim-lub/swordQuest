@@ -5,7 +5,7 @@ const Tests = (function() {
     hitbox: false,
     collisionPoints: false,
     fov: false,
-    attackRadius: false,
+    attackRadius: true,
     attacks: true
   };
 
@@ -58,6 +58,16 @@ const Tests = (function() {
     ctx.restore();
   }
 
+  function drawAttacks(ctx, array) {
+    if (!isEnabled.attacks) return;
+    // console.log(Characters.ATTACKS);
+
+    array.forEach(cur => {
+      ctx.fillStyle = "purple";
+      ctx.fillRect(-Events.listen('CAMERA_OFFSET_X') + cur.position.x, cur.position.y, 5, 5);
+    });
+  }
+
   function eventHandlers() {
     const elements = [
       ['testsuite-toggle-hitbox', 'hitbox'],
@@ -77,6 +87,7 @@ const Tests = (function() {
   return {
     drawHitbox,
     drawCollisionPoints,
+    drawAttacks,
     drawFov,
     drawAttackRadius,
     eventHandlers
