@@ -2,7 +2,6 @@
 const Assets = (function() {
 
   const images = {
-    player: {},
     hero: {},
     hellishsmith: {},
     swordknight: {},

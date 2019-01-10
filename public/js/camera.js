@@ -13,13 +13,12 @@ class Camera {
 
     if (pos.x <= 200 && direction === 'left') {
       this.offsetX += vel.x;
-    } else {
     }
 
     if (pos.x >= 700 && direction === 'right') {
       this.offsetX += vel.x;
-    } else {
     }
+
     Events.emit('CAMERA_OFFSET_X', Math.round(this.offsetX));
   }
 }

@@ -62,7 +62,6 @@ const Load = (function() {
   function images() {
     return new Promise((resolve, reject) => {
       let promises = [];
-      promises.push(_load('sprites.json', 'player'));
 
       promises.push(_loadSprites('animations/hero.json', 'hero'));
       promises.push(_loadSprites('animations/hellishsmith.json', 'hellishsmith'));

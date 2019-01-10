@@ -14,3 +14,12 @@ class Level {
     this.background.render(ctx, 'forest');
   }
 }
+
+class Tile {
+  constructor(object) {
+    this.x = object.x;
+    this.y = object.y;
+    this.width = object.width;
+    this.height = object.height;
+  }
+}
