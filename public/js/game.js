@@ -30,9 +30,10 @@ const Game = (function() {
   function _update(dt) {
     Tests.eventHandlers();
     Lvl.update();
-    Characters.update(dt);
 
+    Characters.update(dt);
     Cam.update();
+
     Events.emit('tiles', LEVEL);
   }
 

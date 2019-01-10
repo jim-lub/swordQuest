@@ -13,7 +13,7 @@ html, body {
   padding: 10px;
   margin: 5px;
   border-radius: 10px;
-  background-color: #a2a6ad;
+  background-color: #5b6c8c;
 }
 
 .box-header-text {
@@ -21,7 +21,7 @@ html, body {
   margin-bottom: 10px;
   font-weight: bold;
   font-size: 14px;
-  border-bottom: 2px solid #306edb;
+  border-bottom: 2px solid #EA4E47;
 }
 
 #testsuite-toggles-visuals {
