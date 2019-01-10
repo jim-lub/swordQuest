@@ -4,9 +4,12 @@
     <meta charset="utf-8">
     <title>SwordQuest</title>
 
+    <link rel="stylesheet" href="/css/style.css">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   </head>
-  <body style="background-color: #151826">
+
+  <body>
     <!-- <div id="content"><img src="assets/img/ui/loading.gif" alt=""></div> -->
     <canvas id="canvas" width="928" height="540"></canvas>
 
@@ -31,18 +34,43 @@
     <script src="js/events.js"></script>
 
     <script src="js/sockets.js"></script>
-    
+
     <script src="js/game.js"></script>
     <script src="js/index.js"></script>
 
-    <div style="color: #1c1c1c; font-family: sans-serif; font-size: 11px; background-color: #f4f4f4; padding: 10px; width: 200px; border-radius: 10px;">
-      <div style="font-weight: bold; font-size: 14px;">Visual tests</div>
-      <div style="margin: 2px">
-        <input type="checkbox" id="testsuite-toggle-hitbox" /> Show hitboxes </br>
-        <input type="checkbox" id="testsuite-toggle-collision-points" /> Show collision points </br>
-        <input type="checkbox" id="testsuite-toggle-enemy-fov" /> Show enemy field of view </br>
-        <input type="checkbox" id="testsuite-toggle-enemy-attackradius" /> Show enemy attack radius </br>
+
+    <!-- UI -->
+    <div id="container">
+      <div class="box">
+        <div class="box-header-text">Toggle visuals (dev only)</div>
+        <div id="testsuite-toggles-visuals">
+          <input type="checkbox" id="testsuite-toggle-hitbox" /> Show hitboxes </br>
+          <input type="checkbox" id="testsuite-toggle-collision-points" /> Show collision points </br>
+          <input type="checkbox" id="testsuite-toggle-enemy-fov" /> Show enemy field of view </br>
+          <input type="checkbox" id="testsuite-toggle-enemy-attackradius" /> Show enemy attack radius </br>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="box-header-text">Controls</div>
+        <div id="controls">
+          <div class="controls-child">
+            <div><img src="assets/img/ui/leftmouseclick.png" alt="left mouse click"></div>
+            <div class="controls-child-text">Attack</div>
+          </div>
+
+          <div class="controls-child">
+            <div><img src="assets/img/ui/keyboard-ad.png" alt="key a, key b"></div>
+            <div class="controls-child-text">Move</div>
+          </div>
+
+          <div class="controls-child" style="border-right: 0px;">
+            <div><img src="assets/img/ui/keyboard-space.png" alt="spacebar"></div>
+            <div class="controls-child-text">Jump</div>
+          </div>
+        </div>
       </div>
     </div>
+
   </body>
 </html>
