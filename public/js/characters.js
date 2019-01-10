@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-const Entity = (function() {
+const Characters = (function() {
   const Ctrls = new Controls();
 
   let ENTITIES = [];
@@ -69,6 +69,12 @@ const Entity = (function() {
     return Object.assign(state, ...[_entity(state), _render(state), _melee(state)]);
   }
 
+
+
+  /********************************************************************************
+  * @Entity Contains components for all entities
+  * @
+  ********************************************************************************/
   const _entity = (state) => ({
     position: new Vector(state.startPosition.x, state.startPosition.y),
     velocity: new Vector(),
@@ -134,155 +140,157 @@ const Entity = (function() {
     }
   });
 
-  /*****************************
-  * FSM
-  ******************************/
+
+
+
+  /********************************************************************************
+  * @Player Contains components for player controlled characters
+  * @ Transitions
+  * @ Actions: idle / run / jump / fall
+  ********************************************************************************/
   const _player = (state) => ({
     transitions: {
       'idle': {
-        active() { _idlePLAYER(state); },
+        active() { state.idle(); },
         run() { state.changeStateTo('run'); },
         jump() { state.changeStateTo('jump'); },
         fall() { state.changeStateTo('fall'); }
       },
       'run': {
-        active() { _runPLAYER(state); },
+        active() { state.run(); },
         idle() { state.changeStateTo('idle'); },
         jump() {state.changeStateTo('jump'); },
         fall() { state.changeStateTo('fall'); }
       },
       'jump': {
-        active() { _jumpPLAYER(state); },
+        active() { state.jump(); },
         fall() { state.changeStateTo('fall'); }
       },
       'fall': {
-        active() { _fallPLAYER(state); },
+        active() { state.fall(); },
         idle() { state.changeStateTo('idle'); }
+      }
+    },
+
+    idle: () => {
+      if (Ctrls.isClicked('leftClick')) {
+        state.animations.play('attack', state.direction);
+        // _attack();
+      } else {
+        state.animations.play('idle', state.direction);
+      }
+
+      if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) state.dispatch('run');
+      if (Ctrls.isPressed('space')) state.dispatch('jump');
+    },
+
+    run: () => {
+      if (Ctrls.isClicked('leftClick')) {
+        state.animations.play('attack_run', state.direction);
+        // _attack();
+      } else {
+        state.animations.play('run', state.direction);
+      }
+
+      if (Ctrls.isPressed('space')) state.dispatch('jump');
+
+      if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
+        state.applyForce(new Vector(15000 * state.directionInt, 0));
+      } else {
+        if (state.velocity.x === 0) state.dispatch('idle');
+      }
+    },
+
+    jump: () => {
+      if (Ctrls.isClicked('leftClick')) {
+        state.animations.play('attack_jump', state.direction);
+        // _attack();
+      } else {
+        state.animations.play('jump', state.direction);
+      }
+
+      if (state.collision.hit('y')) {
+        state.applyVerticalForce(new Vector(0, -60000));
+        state.dispatch('fall');
+      } else {
+        state.dispatch('fall');
+      }
+    },
+
+    fall: () => {
+      if (Ctrls.isClicked('leftClick')) {
+        state.animations.play('attack_jump', state.direction);
+        // _attack();
+      } else {
+        state.animations.play('fall', state.direction);
+      }
+
+      if (!state.collision.hit('y')) {
+        if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
+          state.applyForce(new Vector(15000 * state.directionInt, 0));
+        }
+      } else {
+        state.dispatch('idle');
       }
     }
   });
 
+
+
+  /********************************************************************************
+  * @Npc Contains components for NON player characters
+  * @ Transitions
+  * @ Actions: idle / run / attack
+  ********************************************************************************/
   const _melee = (state) => ({
     transitions: {
       'idle': {
-        active() { _idleNPC(state); },
+        active() { state.idle(); },
         run() { state.changeStateTo('run'); },
         attack() { state.changeStateTo('attack'); }
       },
       'run': {
-        active() { _runNPC(state); },
+        active() { state.run(); },
         idle() { state.changeStateTo('idle'); },
         attack() { state.changeStateTo('attack'); }
       },
       'attack': {
-        active() { _attackNPC(state); },
+        active() { state.attack(); },
         idle() { state.changeStateTo('idle'); },
         run() { state.changeStateTo('run'); }
       }
-    }
+    },
+
+    idle: () => {
+      if (Math.abs(state.velocity.x) > 0) state.dispatch('run');
+
+      _updateDirection(state);
+
+      let distance = _distanceToPlayer(state);
+
+      if (distance > state.radius && distance < state.fov) state.dispatch('run');
+      if (distance < state.radius) state.dispatch('attack');
+    },
+
+    run: () => {
+      if (Math.abs(state.velocity.x) === 0) state.dispatch('idle');
+
+      _updateDirection(state);
+
+      let distance = _distanceToPlayer(state);
+
+      if (distance > state.radius && distance < state.fov) state.applyForce(new Vector(15000 * -state.directionInt, 0));
+      if (distance < state.radius) state.dispatch('attack');
+    },
+
+    attack: () => {
+      _updateDirection(state);
+
+      let distance = _distanceToPlayer(state);
+
+      if (distance > state.radius) state.dispatch('idle');
+    },
   });
-
-  /*****************************
-  * Actions -- PLAYER
-  ******************************/
-  function _idlePLAYER(state) {
-    if (Ctrls.isClicked('leftClick')) {
-      state.animations.play('attack', state.direction);
-      // _attack();
-    } else {
-      state.animations.play('idle', state.direction);
-    }
-
-    if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) state.dispatch('run');
-    if (Ctrls.isPressed('space')) state.dispatch('jump');
-  }
-
-  function _runPLAYER(state) {
-    if (Ctrls.isClicked('leftClick')) {
-      state.animations.play('attack_run', state.direction);
-      // _attack();
-    } else {
-      state.animations.play('run', state.direction);
-    }
-
-    if (Ctrls.isPressed('space')) state.dispatch('jump');
-
-    if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
-      state.applyForce(new Vector(15000 * state.directionInt, 0));
-    } else {
-      if (state.velocity.x === 0) state.dispatch('idle');
-    }
-  }
-
-  function _jumpPLAYER(state) {
-    if (Ctrls.isClicked('leftClick')) {
-      state.animations.play('attack_jump', state.direction);
-      // _attack();
-    } else {
-      state.animations.play('jump', state.direction);
-    }
-
-    if (state.collision.hit('y')) {
-      state.applyVerticalForce(new Vector(0, -150000));
-      state.dispatch('fall');
-    } else {
-      state.dispatch('fall');
-    }
-  }
-
-  function _fallPLAYER(state) {
-    if (Ctrls.isClicked('leftClick')) {
-      state.animations.play('attack_jump', state.direction);
-      // _attack();
-    } else {
-      state.animations.play('fall', state.direction);
-    }
-
-    if (!state.collision.hit('y')) {
-      if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
-        state.applyForce(new Vector(15000 * state.directionInt, 0));
-      }
-    } else {
-      state.dispatch('idle');
-    }
-  }
-
-  function _attackPLAYER(state) {
-
-  }
-
-  /*****************************
-  * Actions -- NPC
-  ******************************/
-  function _idleNPC(state) {
-    if (Math.abs(state.velocity.x) > 0) state.dispatch('run');
-
-    _updateDirection(state);
-
-    let distance = _distanceToPlayer(state);
-
-    if (distance > state.radius && distance < state.fov) state.dispatch('run');
-    if (distance < state.radius) state.dispatch('attack');
-  }
-
-  function _runNPC(state) {
-    if (Math.abs(state.velocity.x) === 0) state.dispatch('idle');
-
-    _updateDirection(state);
-
-    let distance = _distanceToPlayer(state);
-
-    if (distance > state.radius && distance < state.fov) state.applyForce(new Vector(15000 * -state.directionInt, 0));
-    if (distance < state.radius) state.dispatch('attack');
-  }
-
-  function _attackNPC(state) {
-    _updateDirection(state);
-
-    let distance = _distanceToPlayer(state);
-
-    if (distance > state.radius) state.dispatch('idle');
-  }
 
 
   /*****************************
@@ -342,12 +350,15 @@ const Entity = (function() {
     return 0;
   }
 
-  function _getPlayerCoordinates() {
+  function _getPlayerPosition() {
     let player = ENTITIES.filter(cur => {
       return cur.id === _getPlayerID();
     });
 
-    return player[0].position;
+    return {
+      x: player[0].position.x,
+      y: player[0].position.y
+    };
   }
 
   function _getPlayerData() {
@@ -373,7 +384,7 @@ const Entity = (function() {
     if (_getPlayerID() === state.id) {
 
     } else {
-      let direction = Math.sign(state.position.x - _getPlayerCoordinates().x);
+      let direction = Math.sign(state.position.x - _getPlayerPosition().x);
       state.directionInt = direction;
       state.direction = (direction === 1) ? 'left' : 'right';
     }
@@ -391,11 +402,22 @@ const Entity = (function() {
     return Math.floor(Math.random() * 100 * Math.random() * 100 * Math.random() * 100 * Math.random() * 100);
   }
 
+  function followCharacterWithCamera() {
+    return {
+      position: {
+        x: _convertToRelativeCoordinate(_getPlayerPosition().x),
+        y: _getPlayerPosition()
+      },
+      direction: _getPlayerData().direction,
+      velocity: _getPlayerData().velocity
+    };
+  }
+
   /*****************************
   * PUBLIC
   ******************************/
   return {
     ENTITIES, ATTACKS,
-    init, update, render
+    init, update, render, followCharacterWithCamera
   };
 }());

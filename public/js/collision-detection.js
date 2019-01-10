@@ -10,7 +10,7 @@ class CollisionDetection {
 
   update(id, pos, vel, width, height) {
     this.tiles = Events.listen('tiles');
-    this.entities = Entity.ENTITIES;
+    this.entities = Characters.ENTITIES;
     this.x = false;
     this.y = false;
 

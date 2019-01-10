@@ -5,19 +5,20 @@ class Camera {
     this.offsetY = 0;
   }
 
-  update(pos, vel, direction) {
+  update() {
+    let player = Characters.followCharacterWithCamera();
+    let pos = player.position;
+    let direction = player.direction;
+    let vel = player.velocity;
+
     if (pos.x <= 200 && direction === 'left') {
-      Events.emit('PLAYER_HIT_LEFT_WALL', true);
       this.offsetX += vel.x;
     } else {
-      Events.emit('PLAYER_HIT_LEFT_WALL', false);
     }
 
     if (pos.x >= 700 && direction === 'right') {
-      Events.emit('PLAYER_HIT_RIGHT_WALL', true);
       this.offsetX += vel.x;
     } else {
-      Events.emit('PLAYER_HIT_RIGHT_WALL', false);
     }
     Events.emit('CAMERA_OFFSET_X', Math.round(this.offsetX));
   }
