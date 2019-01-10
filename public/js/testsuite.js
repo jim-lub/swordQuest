@@ -5,7 +5,8 @@ const Tests = (function() {
     hitbox: false,
     collisionPoints: false,
     fov: false,
-    attackRadius: false
+    attackRadius: false,
+    attacks: true
   };
 
   function drawHitbox(ctx, x, y, width, height) {
@@ -62,7 +63,8 @@ const Tests = (function() {
       ['testsuite-toggle-hitbox', 'hitbox'],
       ['testsuite-toggle-collision-points', 'collisionPoints'],
       ['testsuite-toggle-enemy-fov', 'fov'],
-      ['testsuite-toggle-enemy-attackradius', 'attackRadius']
+      ['testsuite-toggle-enemy-attackradius', 'attackRadius'],
+      ['testsuite-toggle-attacks', 'attacks']
     ];
 
     elements.forEach(cur => {

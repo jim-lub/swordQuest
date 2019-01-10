@@ -86,7 +86,7 @@ class Controls {
   }
 
   eventListener_mouseDown(MOUSE) {
-    $('body').mousedown(function(event) {
+    $('#canvas').mousedown(function(event) {
 
       MOUSE._name.forEach((mouse, index) => {
 
@@ -99,7 +99,7 @@ class Controls {
   }
 
   eventListener_mouseUp(MOUSE) {
-    $('body').mouseup(function(event) {
+    $('#canvas').mouseup(function(event) {
 
       MOUSE._name.forEach((mouse, index) => {
 
@@ -113,7 +113,7 @@ class Controls {
   }
 
   eventListener_mouseOut(MOUSE) {
-    $('body').mouseout(function(event) {
+    $('#canvas').mouseout(function(event) {
 
       MOUSE._name.forEach((mouse, index) => {
 

@@ -65,7 +65,7 @@ const Game = (function() {
 
     Characters.init({
       player: [
-        {type: 'hero', width: 32, height: 35, health: 100, x: 400, y: 300, mass: 100}
+        {type: 'hero', width: 20, height: 35, health: 100, x: 400, y: 300, mass: 100}
       ],
       npcs: [
         {type: 'hellishsmith', width: 40, height: 75, health: 150, x: 100, y: 200, mass: 600},
