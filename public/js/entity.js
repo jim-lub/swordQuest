@@ -33,6 +33,7 @@ const Entity = (function() {
     let state = {
       id: 0,
       isPlayerControlled: true,
+      isAttacking: false,
       type: player.type,
       startPosition: {x: player.x, y: player.y},
       health: player.health || 100,
@@ -51,6 +52,7 @@ const Entity = (function() {
     let state = {
       id: _generateRandomID(),
       isPlayerControlled: false,
+      isAttacking: false,
       type: npc.type,
       startPosition: {x: npc.x, y: npc.y},
       health: npc.health || 100,
@@ -71,17 +73,14 @@ const Entity = (function() {
     position: new Vector(state.startPosition.x, state.startPosition.y),
     velocity: new Vector(),
     acceleration: new Vector(),
+    verticalAcceleration: new Vector(),
     collision: new CollisionDetection(),
 
     update: (dt) => {
-      state.transitions[state.currentState].active();
-      state.animations.play(state.currentState, state.direction);
+      if (state.id === _getPlayerID()) _setPlayerDirection(state);
+      if (state.id !== _getPlayerID()) state.animations.play(state.currentState, state.direction);
 
-      // state.applyForce(new Vector(5000, 0));
-      if (Ctrls.isPressed('space')) {
-        // console.log(state.direction);
-        state.dispatch('attack');
-      }
+      state.transitions[state.currentState].active();
 
       _updatePhysics(state, dt);
     },
@@ -89,6 +88,11 @@ const Entity = (function() {
     applyForce: (vector) => {
       let force = Vector.divide(vector, state.mass);
       state.acceleration.add(force);
+    },
+
+    applyVerticalForce: (vector) => {
+      let force = Vector.divide(vector, state.mass);
+      state.verticalAcceleration.add(force);
     },
 
     currentState: 'idle',
@@ -182,20 +186,64 @@ const Entity = (function() {
   * Actions -- PLAYER
   ******************************/
   function _idlePLAYER(state) {
-    if (Math.abs(state.velocity.x) > 0) state.dispatch('run');
-
-    if (_getPlayerID() === state.id) {
-      if (Ctrls.isPressed('a')) state.applyForce(new Vector(-25000, 0));
-      if (Ctrls.isPressed('d')) state.applyForce(new Vector(25000, 0));
+    if (Ctrls.isClicked('leftClick')) {
+      state.animations.play('attack', state.direction);
+      // _attack();
+    } else {
+      state.animations.play('idle', state.direction);
     }
+
+    if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) state.dispatch('run');
+    if (Ctrls.isPressed('space')) state.dispatch('jump');
   }
 
   function _runPLAYER(state) {
-    if (Math.abs(state.velocity.x) === 0) state.dispatch('idle');
+    if (Ctrls.isClicked('leftClick')) {
+      state.animations.play('attack_run', state.direction);
+      // _attack();
+    } else {
+      state.animations.play('run', state.direction);
+    }
 
-    if (_getPlayerID() === state.id) {
-      if (Ctrls.isPressed('a')) state.applyForce(new Vector(-25000, 0));
-      if (Ctrls.isPressed('d')) state.applyForce(new Vector(25000, 0));
+    if (Ctrls.isPressed('space')) state.dispatch('jump');
+
+    if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
+      state.applyForce(new Vector(15000 * state.directionInt, 0));
+    } else {
+      if (state.velocity.x === 0) state.dispatch('idle');
+    }
+  }
+
+  function _jumpPLAYER(state) {
+    if (Ctrls.isClicked('leftClick')) {
+      state.animations.play('attack_jump', state.direction);
+      // _attack();
+    } else {
+      state.animations.play('jump', state.direction);
+    }
+
+    if (state.collision.hit('y')) {
+      state.applyVerticalForce(new Vector(0, -150000));
+      state.dispatch('fall');
+    } else {
+      state.dispatch('fall');
+    }
+  }
+
+  function _fallPLAYER(state) {
+    if (Ctrls.isClicked('leftClick')) {
+      state.animations.play('attack_jump', state.direction);
+      // _attack();
+    } else {
+      state.animations.play('fall', state.direction);
+    }
+
+    if (!state.collision.hit('y')) {
+      if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
+        state.applyForce(new Vector(15000 * state.directionInt, 0));
+      }
+    } else {
+      state.dispatch('idle');
     }
   }
 
@@ -241,9 +289,14 @@ const Entity = (function() {
   * Physics
   ******************************/
   function _updatePhysics(state, dt) {
+    state.verticalAcceleration.multiply(0.88);
+
+    if (Math.abs(state.verticalAcceleration.y) < FORCES.epsilon) state.verticalAcceleration.y = 0;
+    state.acceleration.add(state.verticalAcceleration);
+
     state.applyForce(_gravity(state));
     state.applyForce(_friction(state));
-    // state.applyForce(_drag(state));
+    state.applyForce(_drag(state));
 
     state.velocity.add(state.acceleration);
 
@@ -261,7 +314,8 @@ const Entity = (function() {
   }
 
   function _gravity(state) {
-    let f = new Vector(0, (FORCES.gravity * (state.mass * 12)));
+    let f = new Vector(0, (FORCES.gravity * state.mass));
+    f.multiply(10);
     return f;
   }
 
@@ -288,7 +342,7 @@ const Entity = (function() {
     return 0;
   }
 
-  function _getPlayerCoordindates() {
+  function _getPlayerCoordinates() {
     let player = ENTITIES.filter(cur => {
       return cur.id === _getPlayerID();
     });
@@ -304,16 +358,22 @@ const Entity = (function() {
     return player[0];
   }
 
+  function _setPlayerDirection(state) {
+    if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
+      state.directionInt = (Ctrls.lastKeyPressed('a', 'd')) ? -1 : 1;
+      state.direction = (Ctrls.lastKeyPressed('a', 'd')) ? 'left' : 'right';
+    }
+  }
+
   function _convertToRelativeCoordinate(coordinate) { return coordinate + -Events.listen('CAMERA_OFFSET_X');}
 
   function _convertToBaseCoordinate(coordinate) { return coordinate + Events.listen('CAMERA_OFFSET_X');}
 
   function _updateDirection(state) {
     if (_getPlayerID() === state.id) {
-      state.directionInt = 0;
-      state.direction = (direction === 1) ? 'left' : 'right';
+
     } else {
-      let direction = Math.sign(state.position.x - _getPlayerCoordindates().x);
+      let direction = Math.sign(state.position.x - _getPlayerCoordinates().x);
       state.directionInt = direction;
       state.direction = (direction === 1) ? 'left' : 'right';
     }

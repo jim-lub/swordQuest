@@ -95,6 +95,14 @@ class CollisionDetection {
         x: pos.x + vel.x + width,
         y: pos.y + vel.y + height / 2
       },
+      {
+        x: pos.x + vel.x + width / 2,
+        y: pos.y + vel.y
+      },
+      {
+        x: pos.x + vel.x + width / 2,
+        y: pos.y + vel.y + height
+      }
     ];
   }
 }
