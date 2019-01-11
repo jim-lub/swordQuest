@@ -11,8 +11,8 @@
       "air_impact_1": {
         "sprite": "air_impact_1",
         "direction": false,
-        "ticksPerSequence": 159,
-        "ticksPerFrame": 20,
+        "ticksPerSequence": 79,
+        "ticksPerFrame": 10,
         "frames": 8,
         "sX": [0, 58, 116, 174, 232, 290, 348, 406],
         "sY": [0, 0, 0, 0, 0, 0, 0],
@@ -37,8 +37,8 @@
       "energy_effect_2": {
         "sprite": "energy_effect_2",
         "direction": false,
-        "ticksPerSequence": 400,
-        "ticksPerFrame": 20,
+        "ticksPerSequence": 104,
+        "ticksPerFrame": 15,
         "frames": 7,
         "sX": [0, 48, 96, 144, 192, 240, 288],
         "sY": [0, 0, 0, 0, 0, 0, 0],

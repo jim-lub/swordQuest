@@ -51,7 +51,7 @@ const Characters = (function() {
       maxhealth: player.health || 1000,
       damage: 0.5,
       critchance: 5,
-      critdamage: 1.5,
+      critdamage: 2.5,
       hitbox: {
         width: player.width,
         height: player.height
@@ -70,13 +70,14 @@ const Characters = (function() {
       isPlayerControlled: false,
       isAttacking: false,
       attackCooldown: null,
+      hasLanded: false,
       type: npc.type,
       startPosition: {x: npc.x, y: npc.y},
       health: npc.health || 1000,
       maxhealth: npc.health || 1000,
       damage: 1,
       critchance: 5,
-      critdamage: 2,
+      critdamage: 5,
       hitbox: {
         width: npc.width,
         height: npc.height
@@ -107,8 +108,6 @@ const Characters = (function() {
       _isHitByAttack(state);
       if (state.id === _getPlayerID()) _setPlayerDirection(state);
       if (state.id !== _getPlayerID()) state.animations.play(state.currentState, state.direction);
-
-      Fx.play('energy_effect_2');
 
       document.getElementById("testsuite-amount-of-attackpoints").innerHTML = 'Active hit points: ' + ATTACKS.length;
 
@@ -160,18 +159,6 @@ const Characters = (function() {
                     Math.round(_convertToRelativeCoordinate(state.position.x) + currentFrame.offsetX),
                     Math.round(state.position.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
-
-      if(state.id === _getPlayerID()) {
-        let testfx = Fx.state.currentData;
-        ctx.drawImage(Fx.state.currentSprite,
-                      testfx.sX,
-                      testfx.sY,
-                      testfx.sWidth,
-                      testfx.sHeight,
-                      Math.round(_convertToRelativeCoordinate(state.position.x)) - 13,
-                      Math.round(state.position.y) - 8,
-                      testfx.sWidth, testfx.sHeight);
-      }
 
       let healthbarMultiplier = (_healthPercentage(state) < 1) ? _healthPercentage(state) : 0.99;
 
@@ -255,6 +242,8 @@ const Characters = (function() {
     },
 
     jump: () => {
+      state.hasLanded = false;
+
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_jump', state.direction);
         _attack(state);
@@ -429,8 +418,11 @@ const Characters = (function() {
       return collisionX && collisionY;
     })
     .forEach(cur => {
-      if (_isCriticalHit()) _knockBack(state);
-      state.health -= (_isCriticalHit(cur.critchance)) ? cur.critdamage * 5 : cur.damage;
+      if (_isCriticalHit(cur.critchance)) {
+        state.health -= cur.critdamage;
+        _knockBack(state);
+      }
+      state.health -= cur.damage;
     });
   }
 
@@ -471,6 +463,11 @@ const Characters = (function() {
 
     if (state.collision.hit('y')) state.velocity.set(state.velocity.x, 0);
     if (state.collision.hit('x')) state.velocity.set(0, state.velocity.y);
+
+    if (state.collision.hit('y') && !state.hasLanded) {
+      state.hasLanded = true;
+      Fx.create('air_impact_1', state.position.x + (state.hitbox.width / 2) - 29, state.position.y + state.hitbox.height - 19, state.id, false);
+    }
 
     state.velocity.multiply(dt);
     state.position.add(state.velocity);

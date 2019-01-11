@@ -1,6 +1,5 @@
 /* jshint esversion: 6 */
 const Game = (function() {
-  const Cam = new Camera();
   const Lvl = new Level();
 
   const LEVEL = [];
@@ -32,7 +31,8 @@ const Game = (function() {
     Lvl.update();
 
     Characters.update(dt);
-    Cam.update();
+    Fx.update();
+    Camera.update();
 
     Events.emit('tiles', LEVEL);
   }
@@ -42,6 +42,7 @@ const Game = (function() {
 
     Lvl.render(ctx);
     Characters.render(ctx);
+    Fx.render(ctx);
 
     ctx.fillStyle = 'black';
     ctx.globalAlpha = 0.2;
