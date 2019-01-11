@@ -29,6 +29,7 @@ const Animations = (function() {
         frames: CFG.frames,
         sprite: Assets.img(type, CFG.sprite[dir]),
         ticksPerSequence: CFG.ticksPerSequence,
+        ticksPerFrame: CFG.ticksPerFrame,
         sX: CFG.sX[dir][i],
         sY: CFG.sY[i],
         sWidth: CFG.sWidth,

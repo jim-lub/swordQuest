@@ -49,6 +49,9 @@ const Characters = (function() {
       startPosition: {x: player.x, y: player.y},
       health: player.health || 1000,
       maxhealth: player.health || 1000,
+      damage: 0.5,
+      critchance: 5,
+      critdamage: 1.5,
       hitbox: {
         width: player.width,
         height: player.height
@@ -71,6 +74,9 @@ const Characters = (function() {
       startPosition: {x: npc.x, y: npc.y},
       health: npc.health || 1000,
       maxhealth: npc.health || 1000,
+      damage: 1,
+      critchance: 5,
+      critdamage: 2,
       hitbox: {
         width: npc.width,
         height: npc.height
@@ -153,9 +159,12 @@ const Characters = (function() {
                     Math.round(state.position.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
 
+
+      let healthbarMultiplier = (_healthPercentage(state) < 1) ? _healthPercentage(state) : 0.99;
+
       ctx.drawImage(Assets.img('ui', 'healthbars'),
                     0,
-                    180 - (Math.floor(_healthPercentage(state) * 10) * 18) - 18,
+                    180 - (Math.floor(healthbarMultiplier * 10 + 1) * 18),
                     73,
                     18,
                     Math.round(_convertToRelativeCoordinate(state.position.x) + (state.hitbox.width / 2) - 37),
@@ -331,14 +340,29 @@ const Characters = (function() {
   * @
   ********************************************************************************/
   function _attack(state) {
-    state.attackCooldown--;
+    let index = state.animations.currentIndex;
+    let attackStart, attackEnd;
 
-    if (state.attackCooldown <= 0) {
+    if (state.type === 'hero') {
+      attackStart = (state.direction === 'right') ? 3 : 3;
+      attackEnd = (state.direction === 'right') ? 6 : 6;
+    }
+
+    if (state.type === 'hellishsmith') {
+      attackStart = (state.direction === 'right') ? 6 : 6;
+      attackEnd = (state.direction === 'right') ? 8 : 8;
+    }
+
+    if (state.type === 'swordknight') {
+      attackStart = (state.direction === 'right') ? 10 : 10;
+      attackEnd = (state.direction === 'right') ? 15 : 15;
+    }
+
+    if (index >= attackStart && index <= attackEnd) {
       _createNewAttackPoint(state, 10, 5);
       _createNewAttackPoint(state, 10, 2.5);
       _createNewAttackPoint(state, 15, 2);
 
-      state.attackCooldown = 10;
     }
   }
 
@@ -356,7 +380,10 @@ const Characters = (function() {
       time: time,
       speed: speed,
       direction: dir,
-      radius: radius
+      radius: radius,
+      damage: state.damage,
+      critchance: state.critchance,
+      critdamage: state.critdamage
     });
   }
 
@@ -390,7 +417,7 @@ const Characters = (function() {
     })
     .forEach(cur => {
       if (_isCriticalHit()) _knockBack(state);
-      state.health -= (_isCriticalHit()) ? 5 : 1;
+      state.health -= (_isCriticalHit(cur.critchance)) ? cur.critdamage * 5 : cur.damage;
     });
   }
 
@@ -398,10 +425,10 @@ const Characters = (function() {
     state.applyForce(new Vector(5000 * state.directionInt, -15000));
   }
 
-  function _isCriticalHit() {
+  function _isCriticalHit(critchance) {
     let random = Math.floor(Math.random() * 100 + 1);
 
-    return random < 5;
+    return random < critchance;
   }
 
   function _healthPercentage(state) {
