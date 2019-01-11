@@ -25,6 +25,8 @@ class CollisionDetection {
     });
 
     this.entities.forEach(entity => {
+      if (Math.abs(entity.position.x - pos.x) > 150) return;
+
       if (entity.id != id) {
         if (this.boxCollision(hitboxX, {
           x: entity.position.x,

@@ -419,6 +419,15 @@ const Characters = (function() {
     })
     .forEach(cur => {
       if (_isCriticalHit(cur.critchance)) {
+
+        if (state.id === _getPlayerID()) Fx.create('explosion_effect_4', (state.position.x + (state.hitbox.width /2)) - 24, (state.position.y - 48) + state.hitbox.height, state.id, false);
+
+        if (_generateRandomNumberUpTo(10) > 8) {
+          if (state.hitbox.height >= 50) Fx.create('explosion_effect_8', cur.position.x - 8, state.position.y + _generateRandomNumberUpTo(state.hitbox.height - 20), state.id + _generateRandomNumberUpTo(3), false);
+        } else {
+          if (state.hitbox.height >= 50) Fx.create('blood_effect_2', cur.position.x - 8, state.position.y + _generateRandomNumberUpTo(state.hitbox.height - 20), state.id + _generateRandomNumberUpTo(3), false);
+        }
+
         state.health -= cur.critdamage;
         _knockBack(state);
       }
@@ -553,6 +562,10 @@ const Characters = (function() {
 
   function _generateRandomID() {
     return Math.floor(Math.random() * 100 * Math.random() * 100 * Math.random() * 100 * Math.random() * 100);
+  }
+
+  function _generateRandomNumberUpTo(max) {
+    return Math.floor((Math.random() * max) + 1);
   }
 
   function followCharacterWithCamera() {

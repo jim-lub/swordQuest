@@ -4,7 +4,12 @@
       "images": {
         "air_impact_1": "air-impact-1.png",
         "air_effect_1": "air-effect-1.png",
-        "energy_effect_2": "energy-effect-2.png"
+        "energy_effect_2": "energy-effect-2.png",
+        "blood_effect_1": "blood-effect-1.png",
+        "blood_effect_2": "blood-effect-2.png",
+        "explosion_effect_3": "explosion-effect-3.png",
+        "explosion_effect_4": "explosion-effect-4.png",
+        "explosion_effect_8": "explosion-effect-8.png"
       }
     },
     "types": {
@@ -14,8 +19,6 @@
         "ticksPerSequence": 79,
         "ticksPerFrame": 10,
         "frames": 8,
-        "sX": [0, 58, 116, 174, 232, 290, 348, 406],
-        "sY": [0, 0, 0, 0, 0, 0, 0],
         "sWidth": 58,
         "sHeight": 19,
         "offsetX": 0,
@@ -27,23 +30,77 @@
         "ticksPerSequence": 139,
         "ticksPerFrame": 20,
         "frames": 7,
-        "sX": [0, 64, 128, 192, 256, 320, 384],
-        "sY": [0, 0, 0, 0, 0, 0, 0],
         "sWidth": 64,
         "sHeight": 29,
         "offsetX": 0,
         "offsetY": 0
       },
+
       "energy_effect_2": {
         "sprite": "energy_effect_2",
         "direction": false,
         "ticksPerSequence": 104,
         "ticksPerFrame": 15,
         "frames": 7,
-        "sX": [0, 48, 96, 144, 192, 240, 288],
-        "sY": [0, 0, 0, 0, 0, 0, 0],
         "sWidth": 48,
         "sHeight": 48,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+
+      "blood_effect_1": {
+        "sprite": "blood_effect_1",
+        "direction": false,
+        "ticksPerSequence": 59,
+        "ticksPerFrame": 10,
+        "frames": 6,
+        "sWidth": 21,
+        "sHeight": 21,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      "blood_effect_2": {
+        "sprite": "blood_effect_2",
+        "direction": false,
+        "ticksPerSequence": 49,
+        "ticksPerFrame": 10,
+        "frames": 5,
+        "sWidth": 48,
+        "sHeight": 48,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+
+      "explosion_effect_3": {
+        "sprite": "explosion_effect_3",
+        "direction": false,
+        "ticksPerSequence": 63,
+        "ticksPerFrame": 8,
+        "frames": 8,
+        "sWidth": 96,
+        "sHeight": 96,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      "explosion_effect_4": {
+        "sprite": "explosion_effect_4",
+        "direction": false,
+        "ticksPerSequence": 79,
+        "ticksPerFrame": 10,
+        "frames": 8,
+        "sWidth": 48,
+        "sHeight": 48,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      "explosion_effect_8": {
+        "sprite": "explosion_effect_8",
+        "direction": false,
+        "ticksPerSequence": 69,
+        "ticksPerFrame": 10,
+        "frames": 7,
+        "sWidth": 16,
+        "sHeight": 16,
         "offsetX": 0,
         "offsetY": 0
       }
