@@ -68,6 +68,7 @@ const Load = (function() {
       promises.push(_loadSprites('animations/swordknight.json', 'swordknight'));
 
       promises.push(_load('backgrounds.json', 'forest'));
+      promises.push(_load('ui.json', 'ui'));
 
       Promise.all(promises)
       .then(() => resolve())

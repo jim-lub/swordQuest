@@ -16,6 +16,11 @@ const Characters = (function() {
     _loopOverAttacks();
     _filterOutofBoundsAttacks();
 
+    ENTITIES.forEach((cur, index) => {
+      if (cur.id === _getPlayerID()) return;
+      if (cur.health <= 0) ENTITIES.splice(index, 1);
+    });
+
     ENTITIES.forEach(entity => entity.update(dt));
   }
 
@@ -39,9 +44,11 @@ const Characters = (function() {
       id: 0,
       isPlayerControlled: true,
       isAttacking: false,
+      attackCooldown: null,
       type: player.type,
       startPosition: {x: player.x, y: player.y},
-      health: player.health || 100,
+      health: player.health || 1000,
+      maxhealth: player.health || 1000,
       hitbox: {
         width: player.width,
         height: player.height
@@ -62,7 +69,8 @@ const Characters = (function() {
       attackCooldown: null,
       type: npc.type,
       startPosition: {x: npc.x, y: npc.y},
-      health: npc.health || 100,
+      health: npc.health || 1000,
+      maxhealth: npc.health || 1000,
       hitbox: {
         width: npc.width,
         height: npc.height
@@ -90,8 +98,11 @@ const Characters = (function() {
     collision: new CollisionDetection(),
 
     update: (dt) => {
+      _isHitByAttack(state);
       if (state.id === _getPlayerID()) _setPlayerDirection(state);
       if (state.id !== _getPlayerID()) state.animations.play(state.currentState, state.direction);
+
+      document.getElementById("testsuite-amount-of-attackpoints").innerHTML = 'Active hit points: ' + ATTACKS.length;
 
       state.transitions[state.currentState].active();
 
@@ -141,6 +152,19 @@ const Characters = (function() {
                     Math.round(_convertToRelativeCoordinate(state.position.x) + currentFrame.offsetX),
                     Math.round(state.position.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
+
+      ctx.drawImage(Assets.img('ui', 'healthbars'),
+                    0,
+                    180 - (Math.floor(_healthPercentage(state) * 10) * 18) - 18,
+                    73,
+                    18,
+                    Math.round(_convertToRelativeCoordinate(state.position.x) + (state.hitbox.width / 2) - 37),
+                    Math.round(state.position.y - 50),
+                    73, 18);
+
+      ctx.fillStyle = "orange";
+      ctx.font = "bold 10px Verdana";
+      ctx.fillText(Math.floor(state.health), _convertToRelativeCoordinate(state.position.x + (state.hitbox.width / 2) - 37), state.position.y - 52);
 
       Tests.drawHitbox(ctx, Math.round(_convertToRelativeCoordinate(state.position.x)), Math.round(state.position.y), state.hitbox.width, state.hitbox.height);
       Tests.drawCollisionPoints(ctx, true, state.collision.collisionPoints);
@@ -293,11 +317,7 @@ const Characters = (function() {
     attack: () => {
       _updateDirection(state);
 
-      state.attackCooldown--;
-      if (state.attackCooldown <= 0) {
-        _attack(state);
-        state.attackCooldown = 10;
-      }
+      _attack(state);
 
       let distance = _distanceToPlayer(state);
 
@@ -311,6 +331,18 @@ const Characters = (function() {
   * @
   ********************************************************************************/
   function _attack(state) {
+    state.attackCooldown--;
+
+    if (state.attackCooldown <= 0) {
+      _createNewAttackPoint(state, 10, 5);
+      _createNewAttackPoint(state, 10, 2.5);
+      _createNewAttackPoint(state, 15, 2);
+
+      state.attackCooldown = 10;
+    }
+  }
+
+  function _createNewAttackPoint(state, time, speed) {
     let x = state.position.x;
     let y = state.position.y;
     let dir = state.direction;
@@ -318,42 +350,20 @@ const Characters = (function() {
 
     let attackStartPosY = (y + state.hitbox.height) - radius;
 
-    let newAttack = {
+    ATTACKS.push({
+      id: state.id,
       position: new Vector(x + (state.hitbox.width / 2), attackStartPosY),
-      time: 10,
-      speed: 5,
+      time: time,
+      speed: speed,
       direction: dir,
       radius: radius
-    };
-
-    let newAttack2 = {
-      position: new Vector(x + (state.hitbox.width / 2), attackStartPosY),
-      time: 10,
-      speed: 2.5,
-      direction: dir,
-      radius: radius
-    };
-
-    let newAttack3 = {
-      position: new Vector(x + (state.hitbox.width / 2), attackStartPosY),
-      time: 15,
-      speed: 2,
-      direction: dir,
-      radius: radius
-    };
-
-    ATTACKS.push(newAttack);
-    ATTACKS.push(newAttack2);
-    ATTACKS.push(newAttack3);
+    });
   }
 
   function _filterOutofBoundsAttacks() {
 
     let newArray = ATTACKS.filter(cur => {
       return (cur.time > 0);
-    })
-    .filter(cur => {
-      return (_convertToRelativeCoordinate(cur.position.x) > 0 && _convertToRelativeCoordinate(cur.position.x) < 900 && cur.position.y > 0 && cur.position.y < 640);
     });
 
     ATTACKS = newArray;
@@ -369,8 +379,38 @@ const Characters = (function() {
     });
   }
 
+  function _isHitByAttack(state) {
+    ATTACKS.filter(cur => {
+      if (state.id === cur.id) return false;
+
+      let collisionX = cur.position.x > state.position.x && cur.position.x < state.position.x + state.hitbox.width;
+      let collisionY = cur.position.y > state.position.y && cur.position.y < state.position.y + state.hitbox.height;
+
+      return collisionX && collisionY;
+    })
+    .forEach(cur => {
+      if (_isCriticalHit()) _knockBack(state);
+      state.health -= (_isCriticalHit()) ? 5 : 1;
+    });
+  }
+
+  function _knockBack(state) {
+    state.applyForce(new Vector(5000 * state.directionInt, -15000));
+  }
+
+  function _isCriticalHit() {
+    let random = Math.floor(Math.random() * 100 + 1);
+
+    return random < 5;
+  }
+
+  function _healthPercentage(state) {
+    return state.health / state.maxhealth;
+  }
+
   /*****************************
-  * Physics
+  * @Physics
+  * @ Desc
   ******************************/
   function _updatePhysics(state, dt) {
     state.verticalAcceleration.multiply(0.88);
