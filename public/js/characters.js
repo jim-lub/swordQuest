@@ -108,6 +108,8 @@ const Characters = (function() {
       if (state.id === _getPlayerID()) _setPlayerDirection(state);
       if (state.id !== _getPlayerID()) state.animations.play(state.currentState, state.direction);
 
+      Fx.play('energy_effect_2');
+
       document.getElementById("testsuite-amount-of-attackpoints").innerHTML = 'Active hit points: ' + ATTACKS.length;
 
       state.transitions[state.currentState].active();
@@ -159,6 +161,17 @@ const Characters = (function() {
                     Math.round(state.position.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
 
+      if(state.id === _getPlayerID()) {
+        let testfx = Fx.state.currentData;
+        ctx.drawImage(Fx.state.currentSprite,
+                      testfx.sX,
+                      testfx.sY,
+                      testfx.sWidth,
+                      testfx.sHeight,
+                      Math.round(_convertToRelativeCoordinate(state.position.x)) - 13,
+                      Math.round(state.position.y) - 8,
+                      testfx.sWidth, testfx.sHeight);
+      }
 
       let healthbarMultiplier = (_healthPercentage(state) < 1) ? _healthPercentage(state) : 0.99;
 

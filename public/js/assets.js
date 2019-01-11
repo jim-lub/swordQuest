@@ -6,7 +6,8 @@ const Assets = (function() {
     hellishsmith: {},
     swordknight: {},
     forest: {},
-    ui: {}
+    ui: {},
+    fx: {}
   };
 
   function push(type, name, img) {

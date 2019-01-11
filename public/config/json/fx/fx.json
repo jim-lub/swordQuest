@@ -1,0 +1,53 @@
+{"fx": {
+    "data": {
+      "folder": "assets/img/fx/",
+      "images": {
+        "air_impact_1": "air-impact-1.png",
+        "air_effect_1": "air-effect-1.png",
+        "energy_effect_2": "energy-effect-2.png"
+      }
+    },
+    "types": {
+      "air_impact_1": {
+        "sprite": "air_impact_1",
+        "direction": false,
+        "ticksPerSequence": 159,
+        "ticksPerFrame": 20,
+        "frames": 8,
+        "sX": [0, 58, 116, 174, 232, 290, 348, 406],
+        "sY": [0, 0, 0, 0, 0, 0, 0],
+        "sWidth": 58,
+        "sHeight": 19,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      "air_effect_1": {
+        "sprite": "air_effect_1",
+        "direction": false,
+        "ticksPerSequence": 139,
+        "ticksPerFrame": 20,
+        "frames": 7,
+        "sX": [0, 64, 128, 192, 256, 320, 384],
+        "sY": [0, 0, 0, 0, 0, 0, 0],
+        "sWidth": 64,
+        "sHeight": 29,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      "energy_effect_2": {
+        "sprite": "energy_effect_2",
+        "direction": false,
+        "ticksPerSequence": 400,
+        "ticksPerFrame": 20,
+        "frames": 7,
+        "sX": [0, 48, 96, 144, 192, 240, 288],
+        "sY": [0, 0, 0, 0, 0, 0, 0],
+        "sWidth": 48,
+        "sHeight": 48,
+        "offsetX": 0,
+        "offsetY": 0
+      }
+
+    }
+  }
+}

@@ -66,6 +66,7 @@ const Load = (function() {
       promises.push(_loadSprites('animations/hero.json', 'hero'));
       promises.push(_loadSprites('animations/hellishsmith.json', 'hellishsmith'));
       promises.push(_loadSprites('animations/swordknight.json', 'swordknight'));
+      promises.push(_loadSprites('fx/fx.json', 'fx'));
 
       promises.push(_load('backgrounds.json', 'forest'));
       promises.push(_load('ui.json', 'ui'));
