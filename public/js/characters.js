@@ -45,6 +45,7 @@ const Characters = (function() {
       isPlayerControlled: true,
       isAttacking: false,
       attackCooldown: null,
+      healCooldown: 0,
       type: player.type,
       startPosition: {x: player.x, y: player.y},
       health: player.health || 1000,
@@ -70,6 +71,7 @@ const Characters = (function() {
       isPlayerControlled: false,
       isAttacking: false,
       attackCooldown: null,
+      healCooldown: null,
       hasLanded: false,
       type: npc.type,
       startPosition: {x: npc.x, y: npc.y},
@@ -107,6 +109,7 @@ const Characters = (function() {
     update: (dt) => {
       _isHitByAttack(state);
       if (state.id === _getPlayerID()) _setPlayerDirection(state);
+      if (state.id === _getPlayerID() && state.healCooldown > 0) state.healCooldown--;
       if (state.id !== _getPlayerID()) state.animations.play(state.currentState, state.direction);
 
       document.getElementById("testsuite-amount-of-attackpoints").innerHTML = 'Active hit points: ' + ATTACKS.length;
@@ -171,9 +174,14 @@ const Characters = (function() {
                     Math.round(state.position.y - 50),
                     73, 18);
 
-      ctx.fillStyle = "orange";
+
+      ctx.fillStyle = (state.id === _getPlayerID()) ? "lime" : "red";
       ctx.font = "bold 10px Verdana";
-      ctx.fillText(Math.floor(state.health), _convertToRelativeCoordinate(state.position.x + (state.hitbox.width / 2) - 37), state.position.y - 52);
+      ctx.fillText(Math.floor(state.health), _convertToRelativeCoordinate(state.position.x + (state.hitbox.width / 2) - 36), state.position.y - 52);
+
+      ctx.fillStyle = "silver";
+      ctx.font = "bold 8px Verdana";
+      if (state.id === _getPlayerID()) ctx.fillText(Math.floor(state.healCooldown / 60), _convertToRelativeCoordinate(state.position.x + (state.hitbox.width / 2) - 31), state.position.y - 38);
 
       Tests.drawHitbox(ctx, Math.round(_convertToRelativeCoordinate(state.position.x)), Math.round(state.position.y), state.hitbox.width, state.hitbox.height);
       Tests.drawCollisionPoints(ctx, true, state.collision.collisionPoints);
@@ -213,6 +221,8 @@ const Characters = (function() {
     },
 
     idle: () => {
+      if (Ctrls.isPressed('shift')) state.heal();
+
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack', state.direction);
         _attack(state);
@@ -225,6 +235,8 @@ const Characters = (function() {
     },
 
     run: () => {
+      if (Ctrls.isPressed('shift')) state.heal();
+
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_run', state.direction);
         _attack(state);
@@ -243,6 +255,7 @@ const Characters = (function() {
 
     jump: () => {
       state.hasLanded = false;
+      if (Ctrls.isPressed('shift')) state.heal();
 
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_jump', state.direction);
@@ -260,6 +273,8 @@ const Characters = (function() {
     },
 
     fall: () => {
+      if (Ctrls.isPressed('shift')) state.heal();
+
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_jump', state.direction);
         _attack(state);
@@ -274,6 +289,27 @@ const Characters = (function() {
       } else {
         state.dispatch('idle');
       }
+    },
+
+    heal: () => {
+      if (state.healCooldown > 0 || state.health === state.maxhealth) return;
+
+      state.healCooldown = 500;
+
+      let healthToMaxHealth = Math.abs(state.health - state.maxhealth);
+      let healFor = 500;
+
+      state.health += (healthToMaxHealth <= healFor) ? healthToMaxHealth : healFor;
+
+      Fx.create({
+        type: 'energy_effect_2',
+        position: state.position,
+        offsetX: (state.hitbox.width / 2) - 23,
+        offsetY: - 10,
+        id: _generateRandomID(),
+        parentid: state.id,
+        followCharacter: true
+      });
     }
   });
 
@@ -420,13 +456,23 @@ const Characters = (function() {
     .forEach(cur => {
       if (_isCriticalHit(cur.critchance)) {
 
-        if (state.id === _getPlayerID()) Fx.create('explosion_effect_4', (state.position.x + (state.hitbox.width /2)) - 24, (state.position.y - 48) + state.hitbox.height, state.id, false);
+        if (state.id !== _getPlayerID()) Fx.create({
+          type: 'explosion_effect_8',
+          position: state.position,
+          offsetX: _generateRandomNumberUpTo(10),
+          offsetY: _generateRandomNumberUpTo(state.hitbox.height - 20),
+          id: state.id + _generateRandomNumberUpTo(3),
+          parentid: state.id
+        });
 
-        if (_generateRandomNumberUpTo(10) > 8) {
-          if (state.hitbox.height >= 50) Fx.create('explosion_effect_8', cur.position.x - 8, state.position.y + _generateRandomNumberUpTo(state.hitbox.height - 20), state.id + _generateRandomNumberUpTo(3), false);
-        } else {
-          if (state.hitbox.height >= 50) Fx.create('blood_effect_2', cur.position.x - 8, state.position.y + _generateRandomNumberUpTo(state.hitbox.height - 20), state.id + _generateRandomNumberUpTo(3), false);
-        }
+        if (state.id !== _getPlayerID()) Fx.create({
+          type: 'blood_effect_2',
+          position: state.position,
+          offsetX: _generateRandomNumberUpTo(20),
+          offsetY: _generateRandomNumberUpTo(state.hitbox.height - 20),
+          id: state.id + _generateRandomNumberUpTo(3),
+          parentid: state.id
+        });
 
         state.health -= cur.critdamage;
         _knockBack(state);
@@ -475,7 +521,7 @@ const Characters = (function() {
 
     if (state.collision.hit('y') && !state.hasLanded) {
       state.hasLanded = true;
-      Fx.create('air_impact_1', state.position.x + (state.hitbox.width / 2) - 29, state.position.y + state.hitbox.height - 19, state.id, false);
+      // Fx.create('air_impact_1', state.position.x + (state.hitbox.width / 2) - 29, state.position.y + state.hitbox.height - 19, state.id + 1, state.id, false);
     }
 
     state.velocity.multiply(dt);
@@ -521,6 +567,21 @@ const Characters = (function() {
       x: player[0].position.x,
       y: player[0].position.y
     };
+  }
+
+  function _getCharacterPositionById(id) {
+    let character = ENTITIES.filter(cur => {
+      return cur.id === id;
+    });
+
+    return {
+      x: character[0].position.x,
+      y: character[0].position.y
+    };
+  }
+
+  function publishCharacterPosition(id) {
+    return _getCharacterPositionById(id);
   }
 
   function _getPlayerData() {
@@ -584,6 +645,7 @@ const Characters = (function() {
   ******************************/
   return {
     ENTITIES, ATTACKS,
-    init, update, render, followCharacterWithCamera
+    init, update, render, followCharacterWithCamera,
+    publishCharacterPosition
   };
 }());

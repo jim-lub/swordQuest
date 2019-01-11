@@ -25,13 +25,16 @@ const Fx = (function() {
   function _draw(ctx, state) {
     let data = state.currentData;
 
+    let x = (!state.followCharacter) ? Camera.convertXCoord(state.position.x) : Camera.convertXCoord(Characters.publishCharacterPosition(state.parentid).x);
+    let y = (!state.followCharacter) ? state.position.y : Characters.publishCharacterPosition(state.parentid).y;
+
     ctx.drawImage(state.currentSprite,
                     data.sX,
                     data.sY,
                     data.sWidth,
                     data.sHeight,
-                    Camera.convertXCoord(state.position.x),
-                    state.position.y,
+                    x + state.offset.x,
+                    y + state.offset.y,
                     data.sWidth, data.sHeight);
   }
 
@@ -43,16 +46,21 @@ const Fx = (function() {
   ********************************************************************************/
   const Queue = [];
 
-  function create(type, x, y, parentid, loop, followCharacter) {
+  function create({type, position, offsetX, offsetY, id, parentid, loop, followCharacter}) {
     let state = {
         type: type,
-        position: new Vector(x, y),
-        id: parentid,
-        loop: loop,
-        followCharacter: followCharacter
+        position: new Vector(position.x, position.y),
+        offset: {
+          x: offsetX || 0,
+          y: offsetY || 0
+        },
+        id: id,
+        parentid: parentid,
+        loop: loop || false,
+        followCharacter: followCharacter || false
     };
 
-    if (_isUnique(state.id)) {
+    if (_isUnique(state.id, state.type)) {
       let newFx = Object.assign(state, ...[_newFx(state)]);
 
       Queue.push(newFx);
@@ -68,9 +76,9 @@ const Fx = (function() {
   });
 
 
-  function _isUnique(id) {
+  function _isUnique(id, type) {
     let count = Queue.filter(cur => {
-      return cur.id === id;
+      return cur.id === id && cur.type === type;
     }).length;
 
     return (count === 0);

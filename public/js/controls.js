@@ -2,8 +2,8 @@
 class Controls {
   constructor() {
     this.KEY = {
-      _name: ['w', 'a', 's', 'd', 'space'], //  array with key NAMES
-      _code: [87, 65, 83, 68, 32], // array with key CODES
+      _name: ['w', 'a', 's', 'd', 'space', 'shift'], //  array with key NAMES
+      _code: [87, 65, 83, 68, 32, 16], // array with key CODES
       w: {
         active: false,
         enabled: true,
@@ -25,6 +25,11 @@ class Controls {
         timestamp: {keyDown: null, keyUp: null}
       },
       space: {
+        active: false,
+        enabled: true,
+        timestamp: {keyDown: null, keyUp: null}
+      },
+      shift: {
         active: false,
         enabled: true,
         timestamp: {keyDown: null, keyUp: null}
