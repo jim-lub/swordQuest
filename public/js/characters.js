@@ -13,9 +13,7 @@ const Characters = (function() {
   };
 
   function update(dt) {
-    _modifyAllAttackPoints();
-    // _loopOverAttacks();
-    // _filterOutofBoundsAttacks();
+    _updateAllAttackPoints();
 
     ENTITIES.forEach((state, index) => {
       if (_isActivePlayer(state.id)) return;
@@ -59,7 +57,7 @@ const Characters = (function() {
       direction: player.direction || 'right'
     };
 
-    return Object.assign(state, ...[_entity(state), _render(state), playerControlledCharacter(state), isMeleeCharacter(state)]);
+    return Object.assign(state, ...[_entity(state), _render(state), playerControlledCharacter(state), isMeleeCharacter(state), canBeHit(state)]);
   }
 
   function _createNpc(npc) {
@@ -80,13 +78,13 @@ const Characters = (function() {
         height: npc.height
       },
       fov: 150,
-      radius: 75,
-      attackRadius: 75,
+      radius: npc.attackRadius || 75,
+      attackRadius: npc.attackRadius || 75,
       mass: npc.mass || 400,
       direction: npc.direction || 'right'
     };
 
-    return Object.assign(state, ...[_entity(state), _render(state), _melee(state), isMeleeCharacter(state)]);
+    return Object.assign(state, ...[_entity(state), _render(state), isNonPlayedControlledCharacter(state), isMeleeCharacter(state), canBeHit(state)]);
   }
 
 
@@ -103,8 +101,7 @@ const Characters = (function() {
     collision: new CollisionDetection(),
 
     update: (dt) => {
-      _isHitByAttackPoint(state);
-
+      state.isHit();
       if (_isActivePlayer(state.id)) _setPlayerDirection(state);
       if (_isActivePlayer(state.id) && state.healCooldown > 0) state.healCooldown--;
       if (!_isActivePlayer(state.id)) state.animations.play(state.currentState, state.direction);
@@ -307,7 +304,7 @@ const Characters = (function() {
   * @ Transitions
   * @ Actions: idle / run / attack
   ********************************************************************************/
-  const _melee = (state) => ({
+  const isNonPlayedControlledCharacter = (state) => ({
     transitions: {
       'idle': {
         active() { state.idle(); },
@@ -360,27 +357,85 @@ const Characters = (function() {
   });
 
   /********************************************************************************
-  * @Attacks
-  * @ melee
+  * @Combat
+  * @ Emitting attack points
   * @
   ********************************************************************************/
+  const canBeHit = (state) => ({
+    isHit: () => {
+      _filterAttackPointHits(state).forEach(hit => {
+        state.health -= hit.damage;
+
+        if (_isCriticalHit(hit.critchance)) {
+          state.health -= hit.critdamage;
+
+          _knockBack(state);
+
+          Fx.create({
+            type: 'explosion_effect_3',
+            position: {
+              x: state.position.x,
+              y: state.position.y
+            },
+            offsetX: state.hitbox.width / 2,
+            offsetY: state.hitbox.height -48,
+            id: state.id,
+            parentid: state.id
+          });
+
+          Fx.create({
+            type: 'blood_effect_2',
+            position: {
+              x: hit.position.x,
+              y: state.position.y
+            },
+            offsetX: 0,
+            offsetY: Utils.randomNumberBetween(10, (state.hitbox.height - 10)),
+            id: state.id,
+            parentid: state.id
+          });
+
+          Fx.create({
+            type: 'blood_effect_1',
+            position: {
+              x: hit.position.x,
+              y: state.position.y
+            },
+            offsetX: 0,
+            offsetY: Utils.randomNumberBetween(10, (state.hitbox.height - 10)),
+            id: state.id + Utils.randomNumberBetween(1, 10),
+            parentid: state.id
+          });
+
+        }
+      });
+    }
+  });
+
   const isMeleeCharacter = (state) => ({
     meleeAttack: () => {
-      if (_isActiveAttackFrame(state)) _emitAttackPoint(state, 4, 110, 160, 0.7);
-      if (_isActiveAttackFrame(state)) _emitAttackPoint(state, 6, 110, 160, 0.8);
-      if (_isActiveAttackFrame(state)) _emitAttackPoint(state, 8, 110, 160, 0.9);
-      if (_isActiveAttackFrame(state)) _emitAttackPoint(state, 10, 110, 160, 1);
+      if (_isActiveAttackFrame(state) && state.attackRadius > 70) _emitCircularAttackPoint(state, 4, 140, 170, 0.4);
+      if (_isActiveAttackFrame(state)) _emitCircularAttackPoint(state, 6, 125, 170, 0.6);
+      if (_isActiveAttackFrame(state) && state.attackRadius > 50) _emitCircularAttackPoint(state, 8, 110, 170, 0.8);
+      if (_isActiveAttackFrame(state)) _emitCircularAttackPoint(state, 10, 100, 170, 1);
 
     }
   });
 
-  function _emitAttackPoint(state, totalPoints, startAngle, endAngle, scaleModifier) {
+  function _isActiveAttackFrame(state) {
+    return state.animations.activeAttackFrames.filter(i => {
+      return i === state.animations.currentIndex;
+    }).length > 0;
+  }
+
+  function _emitCircularAttackPoint(state, totalPoints, startAngle, endAngle, scaleModifier) {
     let x = state.position.x + (state.hitbox.width / 2);
     let y = state.position.y + state.hitbox.height;
 
     ATTACKS.push({
       id: Utils.randomID(),
-      parentid: state.parentid,
+      parentid: state.id,
+      type: "circular",
       origin: new Vector(x, y),
       angle: (startAngle / 180) * Math.PI,
       step: ((endAngle / 180) - (startAngle / 180)) * Math.PI / totalPoints,
@@ -394,141 +449,42 @@ const Characters = (function() {
     });
   }
 
-  function _modifyAllAttackPoints() {
+  /********************************************************************************
+  * @Combat
+  * @ Managing attack points
+  * @
+  ********************************************************************************/
+  function _updateAllAttackPoints() {
     ATTACKS = ATTACKS.filter(cur => {
       return (cur.angle < cur.maxAngle);
     });
 
     ATTACKS.forEach(point => {
-      let modifiedRadius = (point.direction === 'left') ? point.radius : -point.radius;
-
-      let x = point.origin.x + (modifiedRadius * Math.cos(point.angle));
-      let y = point.origin.y - point.radius * Math.sin(point.angle);
-
-      point.position = new Vector(x, y);
-      point.angle += point.step;
+      if (point.type === 'circular') _updateCircularPattern(point);
     });
   }
 
-  function _isActiveAttackFrame(state) {
-    return state.animations.activeAttackFrames.filter(i => {
-      return i === state.animations.currentIndex;
-    }).length > 0;
+  function _updateCircularPattern(point) {
+    let modifiedRadius = (point.direction === 'left') ? point.radius : -point.radius;
+
+    let x = point.origin.x + (modifiedRadius * Math.cos(point.angle));
+    let y = point.origin.y - point.radius * Math.sin(point.angle);
+
+    point.position = new Vector(x, y);
+    point.angle += point.step;
   }
 
-  /********************************************************************************
-  * @Combat
-  * @
-  * @
-  ********************************************************************************/
-  function _attack(state) {
-    let index = state.animations.currentIndex;
-    let attackStart, attackEnd;
-
-    if (state.type === 'hero') {
-      attackStart = (state.direction === 'right') ? 3 : 3;
-      attackEnd = (state.direction === 'right') ? 6 : 6;
-    }
-
-    if (state.type === 'hellishsmith') {
-      attackStart = (state.direction === 'right') ? 6 : 6;
-      attackEnd = (state.direction === 'right') ? 8 : 8;
-    }
-
-    if (state.type === 'swordknight') {
-      attackStart = (state.direction === 'right') ? 10 : 10;
-      attackEnd = (state.direction === 'right') ? 15 : 15;
-    }
-
-    if (index >= attackStart && index <= attackEnd) {
-      _createNewAttackPoint(state, 10, 5);
-      _createNewAttackPoint(state, 10, 2.5);
-      _createNewAttackPoint(state, 15, 2);
-
-    }
-  }
-
-  function _createNewAttackPoint(state, time, speed) {
-    let x = state.position.x;
-    let y = state.position.y;
-    let dir = state.direction;
-    let radius = state.radius;
-
-    let attackStartPosY = (y + state.hitbox.height) - radius;
-
-    ATTACKS.push({
-      id: state.id,
-      position: new Vector(x + (state.hitbox.width / 2), attackStartPosY),
-      time: time,
-      speed: speed,
-      direction: dir,
-      radius: radius,
-      damage: state.damage,
-      critchance: state.critchance,
-      critdamage: state.critdamage
+  function _filterAttackPointHits(state) {
+    return ATTACKS.filter(point => {
+      return _attackPointCollision(state, point) && (state.id !== point.parentid);
     });
   }
 
-  function _filterOutofBoundsAttacks() {
+  function _attackPointCollision(state, point) {
+    let collisionX = point.position.x >= state.position.x && point.position.x < state.position.x + state.hitbox.width;
+    let collisionY = point.position.y >= state.position.y && point.position.y < state.position.y + state.hitbox.height;
 
-    let newArray = ATTACKS.filter(cur => {
-      return (cur.time > 0);
-    });
-
-    ATTACKS = newArray;
-  }
-
-  function _loopOverAttacks() {
-    ATTACKS.forEach(cur => {
-      cur.time--;
-      let speed = (cur.radius * 0.1) * cur.speed * ((cur.time) * 0.05);
-      let x = (cur.direction === 'left') ? -speed : speed;
-      let y = (cur.radius * 0.1) * cur.speed * ((11 - cur.time) * 0.05);
-      cur.position.add(new Vector(x, y));
-    });
-  }
-
-  function _isHitByAttackPoint(state) {
-    ATTACKS.filter(cur => {
-      if (state.id === cur.id) return false;
-
-      let collisionX = cur.position.x > state.position.x && cur.position.x < state.position.x + state.hitbox.width;
-      let collisionY = cur.position.y > state.position.y && cur.position.y < state.position.y + state.hitbox.height;
-
-      return collisionX && collisionY;
-    })
-    .forEach(cur => {
-      if (_isCriticalHit(cur.critchance)) {
-
-        if (state.id !== _getPlayerID()) Fx.create({
-          type: 'explosion_effect_8',
-          position: {
-            x: cur.position.x,
-            y: state.position.y
-          },
-          offsetX: 0,
-          offsetY: _generateRandomNumberUpTo(state.hitbox.height),
-          id: state.id + _generateRandomNumberUpTo(3),
-          parentid: state.id
-        });
-
-        if (state.id !== _getPlayerID()) Fx.create({
-          type: 'blood_effect_2',
-          position: {
-            x: cur.position.x,
-            y: state.position.y
-          },
-          offsetX: 0,
-          offsetY: _generateRandomNumberUpTo(state.hitbox.height),
-          id: state.id + _generateRandomNumberUpTo(3),
-          parentid: state.id
-        });
-
-        state.health -= cur.critdamage;
-        _knockBack(state);
-      }
-      state.health -= cur.damage;
-    });
+    return (collisionX && collisionY);
   }
 
   function _knockBack(state) {

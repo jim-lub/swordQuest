@@ -72,7 +72,7 @@
           "left": "animation_attack_left",
           "right": "animation_attack_right"
         },
-        "activeAttackFrames": [6, 7, 8],
+        "activeAttackFrames": [6, 7],
         "direction": ["left", "right"],
         "ticksPerSequence": 111,
         "ticksPerFrame": 7,

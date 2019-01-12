@@ -5,7 +5,7 @@ const Tests = (function() {
     hitbox: false,
     collisionPoints: false,
     fov: false,
-    attackRadius: true,
+    attackRadius: false,
     attacks: true
   };
 
@@ -64,7 +64,7 @@ const Tests = (function() {
 
     array.forEach(cur => {
       ctx.fillStyle = "purple";
-      ctx.fillRect(-Events.listen('CAMERA_OFFSET_X') + cur.position.x, cur.position.y, 5, 5);
+      ctx.fillRect(-Events.listen('CAMERA_OFFSET_X') + cur.position.x - 2.5, cur.position.y - 2.5, 4, 4);
     });
   }
 
