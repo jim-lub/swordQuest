@@ -27,7 +27,7 @@ const Game = (function() {
   };
 
   function _update(dt) {
-    Tests.eventHandlers();
+    DevTools.Components.listener();
     Lvl.update();
 
     Characters.update(dt);

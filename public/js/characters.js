@@ -26,7 +26,10 @@ const Characters = (function() {
   function render(ctx) {
     ENTITIES.forEach(entity => entity.render(ctx));
 
-    Tests.drawAttacks(ctx, ATTACKS);
+    DevTools.Visualizer.start('characterAttackPoints', ctx, {
+      offsetX: Camera.convertXCoord(0),
+      attackPoints: ATTACKS
+    });
   }
 
   function init({player, npcs}) {
@@ -144,15 +147,28 @@ const Characters = (function() {
     render: (ctx) => {
       let currentFrame = state.animations.currentData;
 
-      Tests.drawFov(ctx, Math.round(_convertToRelativeCoordinate(state.position.x)), Math.round(state.position.y), state.hitbox.width, state.hitbox.height, state.fov);
-      Tests.drawAttackRadius(ctx, Math.round(_convertToRelativeCoordinate(state.position.x)), Math.round(state.position.y), state.hitbox.width, state.hitbox.height, state.radius);
+      DevTools.Visualizer.start('characterFieldOfView', ctx, {
+        x: Camera.convertXCoord(state.position.x),
+        y: state.position.y,
+        width: state.hitbox.width,
+        height: state.hitbox.height,
+        fov: state.fov
+      });
+
+      DevTools.Visualizer.start('characterAttackRadius', ctx, {
+        x: Camera.convertXCoord(state.position.x),
+        y: state.position.y,
+        width: state.hitbox.width,
+        height: state.hitbox.height,
+        attackRadius: state.attackRadius
+      });
 
       ctx.drawImage(state.animations.currentSprite,
                     currentFrame.sX,
                     currentFrame.sY,
                     currentFrame.sWidth,
                     currentFrame.sHeight,
-                    Math.round(_convertToRelativeCoordinate(state.position.x) + currentFrame.offsetX),
+                    Math.round(Camera.convertXCoord(state.position.x) + currentFrame.offsetX),
                     Math.round(state.position.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
 
@@ -163,21 +179,30 @@ const Characters = (function() {
                     180 - (Math.floor(healthbarMultiplier * 10 + 1) * 18),
                     73,
                     18,
-                    Math.round(_convertToRelativeCoordinate(state.position.x) + (state.hitbox.width / 2) - 37),
+                    Math.round(Camera.convertXCoord(state.position.x) + (state.hitbox.width / 2) - 37),
                     Math.round(state.position.y - 50),
                     73, 18);
 
 
       ctx.fillStyle = (state.id === _getPlayerID()) ? "lime" : "red";
       ctx.font = "bold 10px Verdana";
-      ctx.fillText(Math.floor(state.health), _convertToRelativeCoordinate(state.position.x + (state.hitbox.width / 2) - 36), state.position.y - 52);
+      ctx.fillText(Math.floor(state.health), Camera.convertXCoord(state.position.x + (state.hitbox.width / 2) - 36), state.position.y - 52);
 
       ctx.fillStyle = "silver";
       ctx.font = "bold 8px Verdana";
-      if (state.id === _getPlayerID()) ctx.fillText(Math.floor(state.healCooldown / 60), _convertToRelativeCoordinate(state.position.x + (state.hitbox.width / 2) - 31), state.position.y - 38);
+      if (state.id === _getPlayerID()) ctx.fillText(Math.floor(state.healCooldown / 60), Camera.convertXCoord(state.position.x + (state.hitbox.width / 2) - 31), state.position.y - 38);
 
-      Tests.drawHitbox(ctx, Math.round(_convertToRelativeCoordinate(state.position.x)), Math.round(state.position.y), state.hitbox.width, state.hitbox.height);
-      Tests.drawCollisionPoints(ctx, true, state.collision.collisionPoints);
+      DevTools.Visualizer.start('characterHitbox', ctx, {
+        x: Camera.convertXCoord(state.position.x),
+        y: state.position.y,
+        width: state.hitbox.width,
+        height: state.hitbox.height
+      });
+
+      DevTools.Visualizer.start('characterCollisionPoints', ctx, {
+        offsetX: Camera.convertXCoord(0),
+        collisionPoints: state.collision.collisionPoints
+      });
     }
   });
 
@@ -290,7 +315,7 @@ const Characters = (function() {
         position: state.position,
         offsetX: (state.hitbox.width / 2),
         offsetY: (state.hitbox.height / 2),
-        id: _generateRandomID(),
+        id: Utils.randomID(),
         parentid: state.id,
         followCharacter: true
       });
@@ -492,9 +517,7 @@ const Characters = (function() {
   }
 
   function _isCriticalHit(critchance) {
-    let random = Math.floor(Math.random() * 100 + 1);
-
-    return random < critchance;
+    return Math.floor(Math.random() * 100 + 1) < critchance;
   }
 
   function _healthPercentage(state) {
@@ -604,10 +627,6 @@ const Characters = (function() {
     }
   }
 
-  function _convertToRelativeCoordinate(coordinate) { return coordinate + -Events.listen('CAMERA_OFFSET_X');}
-
-  function _convertToBaseCoordinate(coordinate) { return coordinate + Events.listen('CAMERA_OFFSET_X');}
-
   function _updateDirection(state) {
     if (_getPlayerID() === state.id) {
 
@@ -626,20 +645,10 @@ const Characters = (function() {
     return Math.abs(entityCenter - playerCenter);
   }
 
-  // REMOVE -> MOVED to UTILS
-  function _generateRandomID() {
-    return Math.floor(Math.random() * 100 * Math.random() * 100 * Math.random() * 100 * Math.random() * 100);
-  }
-
-  function _generateRandomNumberUpTo(max) {
-    return Math.floor((Math.random() * max) + 1);
-  }
-  // REMOVE -> MOVED to UTILS
-
   function followCharacterWithCamera() {
     return {
       position: {
-        x: _convertToRelativeCoordinate(_getPlayerPosition().x),
+        x: Camera.convertXCoord(_getPlayerPosition().x),
         y: _getPlayerPosition()
       },
       direction: _getPlayerData().direction,

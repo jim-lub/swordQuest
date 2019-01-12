@@ -15,7 +15,8 @@
 
     <script src="/socket.io/socket.io.js"></script>
 
-    <script src="js/testsuite.js"></script>
+    <script src="devtools/devtools.js"></script>
+
     <script src="js/controls.js"></script>
     <script src="js/utilities.js"></script>
 
@@ -46,11 +47,21 @@
       <div class="box">
         <div class="box-header-text">Toggle visuals (dev only)</div>
         <div id="testsuite-toggles-visuals">
-          <input type="checkbox" id="testsuite-toggle-hitbox" /> character: hitboxes </br>
-          <input type="checkbox" id="testsuite-toggle-collision-points" /> character: collision points </br>
-          <input type="checkbox" id="testsuite-toggle-enemy-fov" /> character: field of view </br>
-          <input type="checkbox" id="testsuite-toggle-enemy-attackradius" /> character: attack radius </br>
-          <input type="checkbox" id="testsuite-toggle-attacks" /> floating attack points </br>
+          <div id="toggle-visualizer-characterHitbox">Text</div>
+            <script>DevTools.Components.toggle('visualizer', 'characterHitbox');</script>
+
+          <div id="toggle-visualizer-characterCollisionPoints">Text</div>
+            <script>DevTools.Components.toggle('visualizer', 'characterCollisionPoints');</script>
+
+          <div id="toggle-visualizer-characterFieldOfView">Text</div>
+            <script>DevTools.Components.toggle('visualizer', 'characterFieldOfView');</script>
+
+          <div id="toggle-visualizer-characterAttackRadius">Text</div>
+            <script>DevTools.Components.toggle('visualizer', 'characterAttackRadius');</script>
+
+          <div id="toggle-visualizer-characterAttackPoints">Text</div>
+            <script>DevTools.Components.toggle('visualizer', 'characterAttackPoints');</script>
+
         </div>
       </div>
 
