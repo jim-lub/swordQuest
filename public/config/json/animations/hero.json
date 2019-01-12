@@ -26,6 +26,7 @@
           "left": "animation_idle_left",
           "right": "animation_idle_right"
         },
+        "activeAttackFrames": [],
         "direction": ["left", "right"],
         "ticksPerSequence": 59,
         "ticksPerFrame": 10,
@@ -51,6 +52,7 @@
           "left": "animation_run_left",
           "right": "animation_run_right"
         },
+        "activeAttackFrames": [],
         "direction": ["left", "right"],
         "ticksPerSequence": 47,
         "ticksPerFrame": 6,
@@ -76,6 +78,7 @@
           "left": "animation_jump_left",
           "right": "animation_jump_right"
         },
+        "activeAttackFrames": [],
         "direction": ["left", "right"],
         "ticksPerSequence": 19,
         "ticksPerFrame": 10,
@@ -101,6 +104,7 @@
           "left": "animation_fall_left",
           "right": "animation_fall_right"
         },
+        "activeAttackFrames": [],
         "direction": ["left", "right"],
         "ticksPerSequence": 19,
         "ticksPerFrame": 10,
@@ -126,6 +130,7 @@
           "left": "animation_attack_left",
           "right": "animation_attack_right"
         },
+        "activeAttackFrames": [3, 4, 5, 6],
         "direction": ["left", "right"],
         "ticksPerSequence": 35,
         "ticksPerFrame": 4,
@@ -151,6 +156,7 @@
           "left": "animation_attack_run_left",
           "right": "animation_attack_run_right"
         },
+        "activeAttackFrames": [3, 4, 5, 6],
         "direction": ["left", "right"],
         "ticksPerSequence": 35,
         "ticksPerFrame": 4,
@@ -176,6 +182,7 @@
           "left": "animation_attack_jump_left",
           "right": "animation_attack_jump_right"
         },
+        "activeAttackFrames": [3, 4, 5, 6],
         "direction": ["left", "right"],
         "ticksPerSequence": 31,
         "ticksPerFrame": 4,

@@ -5,8 +5,8 @@ const Tests = (function() {
     hitbox: false,
     collisionPoints: false,
     fov: false,
-    attackRadius: false,
-    attacks: false
+    attackRadius: true,
+    attacks: true
   };
 
   function drawHitbox(ctx, x, y, width, height) {

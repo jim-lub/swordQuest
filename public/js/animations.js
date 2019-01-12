@@ -28,6 +28,7 @@ const Animations = (function() {
         index: i,
         frames: CFG.frames,
         sprite: Assets.img(type, CFG.sprite[dir]),
+        activeAttackFrames: CFG.activeAttackFrames,
         ticksPerSequence: CFG.ticksPerSequence,
         ticksPerFrame: CFG.ticksPerFrame,
         sX: CFG.sX[dir][i],
@@ -75,6 +76,7 @@ const Animations = (function() {
       currentSprite: null,
       currentData: null,
       currentIndex: null,
+      activeAttackFrames: null,
       tickCount: 0,
       type: type
     };
@@ -101,6 +103,7 @@ const Animations = (function() {
                 offsetY: frame.offsetY
               };
               state.currentIndex = frame.index;
+              state.activeAttackFrames = frame.activeAttackFrames;
         }
 
         if (state.tickCount > frame.ticksPerSequence) {

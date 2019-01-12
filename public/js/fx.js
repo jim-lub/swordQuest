@@ -33,8 +33,8 @@ const Fx = (function() {
                     data.sY,
                     data.sWidth,
                     data.sHeight,
-                    x + state.offset.x,
-                    y + state.offset.y,
+                    x + state.offset.x - (data.sWidth / 2),
+                    y + state.offset.y - (data.sHeight / 2),
                     data.sWidth, data.sHeight);
   }
 
@@ -153,7 +153,7 @@ const Fx = (function() {
       let objects = [_build('fx')];
 
       Promise.all(objects)
-      .then(() => {console.log(savedSequences); resolve(); })
+      .then(() => resolve())
       .catch(e => reject(e));
     });
   }

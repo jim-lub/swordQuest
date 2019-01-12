@@ -70,8 +70,8 @@ const Game = (function() {
       ],
       npcs: [
         {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 100, y: 200, mass: 600},
-        {type: 'swordknight', width: 40, height: 65, health: 1500, x: 300, y: 200, mass: 700},
-        {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 500, y: 200, mass: 600}
+        {type: 'swordknight', width: 40, height: 65, health: 1500, x: 300, y: 200, mass: 700}
+        // {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 500, y: 200, mass: 600}
       ]
     });
 

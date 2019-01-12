@@ -13,12 +13,13 @@ const Characters = (function() {
   };
 
   function update(dt) {
-    _loopOverAttacks();
-    _filterOutofBoundsAttacks();
+    _modifyAllAttackPoints();
+    // _loopOverAttacks();
+    // _filterOutofBoundsAttacks();
 
-    ENTITIES.forEach((cur, index) => {
-      if (cur.id === _getPlayerID()) return;
-      if (cur.health <= 0) ENTITIES.splice(index, 1);
+    ENTITIES.forEach((state, index) => {
+      if (_isActivePlayer(state.id)) return;
+      if (state.health <= 0) ENTITIES.splice(index, 1);
     });
 
     ENTITIES.forEach(entity => entity.update(dt));
@@ -31,12 +32,8 @@ const Characters = (function() {
   }
 
   function init({player, npcs}) {
-
     npcs.forEach(npc => ENTITIES.push(_createNpc(npc)));
-
     player.forEach(player => ENTITIES.push(_createPlayer(player)));
-
-    console.log(ENTITIES);
   }
 
   function _createPlayer(player) {
@@ -44,7 +41,6 @@ const Characters = (function() {
       id: 0,
       isPlayerControlled: true,
       isAttacking: false,
-      attackCooldown: null,
       healCooldown: 0,
       type: player.type,
       startPosition: {x: player.x, y: player.y},
@@ -58,21 +54,20 @@ const Characters = (function() {
         height: player.height
       },
       radius: 40,
+      attackRadius: 40,
       mass: player.mass || 200,
       direction: player.direction || 'right'
     };
 
-    return Object.assign(state, ...[_entity(state), _render(state), _player(state)]);
+    return Object.assign(state, ...[_entity(state), _render(state), playerControlledCharacter(state), isMeleeCharacter(state)]);
   }
 
   function _createNpc(npc) {
     let state = {
-      id: _generateRandomID(),
+      id: Utils.randomID(),
       isPlayerControlled: false,
       isAttacking: false,
-      attackCooldown: null,
       healCooldown: null,
-      hasLanded: false,
       type: npc.type,
       startPosition: {x: npc.x, y: npc.y},
       health: npc.health || 1000,
@@ -86,11 +81,12 @@ const Characters = (function() {
       },
       fov: 150,
       radius: 75,
+      attackRadius: 75,
       mass: npc.mass || 400,
       direction: npc.direction || 'right'
     };
 
-    return Object.assign(state, ...[_entity(state), _render(state), _melee(state)]);
+    return Object.assign(state, ...[_entity(state), _render(state), _melee(state), isMeleeCharacter(state)]);
   }
 
 
@@ -107,14 +103,16 @@ const Characters = (function() {
     collision: new CollisionDetection(),
 
     update: (dt) => {
-      _isHitByAttack(state);
-      if (state.id === _getPlayerID()) _setPlayerDirection(state);
-      if (state.id === _getPlayerID() && state.healCooldown > 0) state.healCooldown--;
-      if (state.id !== _getPlayerID()) state.animations.play(state.currentState, state.direction);
+      _isHitByAttackPoint(state);
+
+      if (_isActivePlayer(state.id)) _setPlayerDirection(state);
+      if (_isActivePlayer(state.id) && state.healCooldown > 0) state.healCooldown--;
+      if (!_isActivePlayer(state.id)) state.animations.play(state.currentState, state.direction);
 
       document.getElementById("testsuite-amount-of-attackpoints").innerHTML = 'Active hit points: ' + ATTACKS.length;
 
       state.transitions[state.currentState].active();
+      if (Ctrls.isPressed('shift') && _isActivePlayer(state.id)) state.heal();
 
       _updatePhysics(state, dt);
     },
@@ -135,9 +133,7 @@ const Characters = (function() {
       const actions = state.transitions[state.currentState];
       const action = state.transitions[state.currentState][actionName];
 
-      if (action) {
-        action.apply(state);
-      }
+      if (action) action.apply(state);
     },
 
     changeStateTo: (transition) => {
@@ -196,7 +192,7 @@ const Characters = (function() {
   * @ Transitions
   * @ Actions: idle / run / jump / fall
   ********************************************************************************/
-  const _player = (state) => ({
+  const playerControlledCharacter = (state) => ({
     transitions: {
       'idle': {
         active() { state.idle(); },
@@ -221,11 +217,9 @@ const Characters = (function() {
     },
 
     idle: () => {
-      if (Ctrls.isPressed('shift')) state.heal();
-
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack', state.direction);
-        _attack(state);
+        state.meleeAttack(state);
       } else {
         state.animations.play('idle', state.direction);
       }
@@ -235,11 +229,9 @@ const Characters = (function() {
     },
 
     run: () => {
-      if (Ctrls.isPressed('shift')) state.heal();
-
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_run', state.direction);
-        _attack(state);
+        state.meleeAttack(state);
       } else {
         state.animations.play('run', state.direction);
       }
@@ -254,12 +246,9 @@ const Characters = (function() {
     },
 
     jump: () => {
-      state.hasLanded = false;
-      if (Ctrls.isPressed('shift')) state.heal();
-
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_jump', state.direction);
-        _attack(state);
+        state.meleeAttack(state);
       } else {
         state.animations.play('jump', state.direction);
       }
@@ -273,11 +262,9 @@ const Characters = (function() {
     },
 
     fall: () => {
-      if (Ctrls.isPressed('shift')) state.heal();
-
       if (Ctrls.isClicked('leftClick')) {
         state.animations.play('attack_jump', state.direction);
-        _attack(state);
+        state.meleeAttack(state);
       } else {
         state.animations.play('fall', state.direction);
       }
@@ -304,8 +291,8 @@ const Characters = (function() {
       Fx.create({
         type: 'energy_effect_2',
         position: state.position,
-        offsetX: (state.hitbox.width / 2) - 23,
-        offsetY: - 10,
+        offsetX: (state.hitbox.width / 2),
+        offsetY: (state.hitbox.height / 2),
         id: _generateRandomID(),
         parentid: state.id,
         followCharacter: true
@@ -346,8 +333,8 @@ const Characters = (function() {
 
       let distance = _distanceToPlayer(state);
 
-      if (distance > state.radius && distance < state.fov) state.dispatch('run');
-      if (distance < state.radius) state.dispatch('attack');
+      if (distance > state.attackRadius && distance < state.fov) state.dispatch('run');
+      if (distance < state.attackRadius) state.dispatch('attack');
     },
 
     run: () => {
@@ -357,20 +344,77 @@ const Characters = (function() {
 
       let distance = _distanceToPlayer(state);
 
-      if (distance > state.radius && distance < state.fov) state.applyForce(new Vector(15000 * -state.directionInt, 0));
-      if (distance < state.radius) state.dispatch('attack');
+      if (distance > state.attackRadius && distance < state.fov) state.applyForce(new Vector(15000 * -state.directionInt, 0));
+      if (distance < state.attackRadius) state.dispatch('attack');
     },
 
     attack: () => {
       _updateDirection(state);
 
-      _attack(state);
+      state.meleeAttack(state);
 
       let distance = _distanceToPlayer(state);
 
-      if (distance > state.radius) state.dispatch('idle');
-    },
+      if (distance > state.attackRadius) state.dispatch('idle');
+    }
   });
+
+  /********************************************************************************
+  * @Attacks
+  * @ melee
+  * @
+  ********************************************************************************/
+  const isMeleeCharacter = (state) => ({
+    meleeAttack: () => {
+      if (_isActiveAttackFrame(state)) _emitAttackPoint(state, 4, 110, 160, 0.7);
+      if (_isActiveAttackFrame(state)) _emitAttackPoint(state, 6, 110, 160, 0.8);
+      if (_isActiveAttackFrame(state)) _emitAttackPoint(state, 8, 110, 160, 0.9);
+      if (_isActiveAttackFrame(state)) _emitAttackPoint(state, 10, 110, 160, 1);
+
+    }
+  });
+
+  function _emitAttackPoint(state, totalPoints, startAngle, endAngle, scaleModifier) {
+    let x = state.position.x + (state.hitbox.width / 2);
+    let y = state.position.y + state.hitbox.height;
+
+    ATTACKS.push({
+      id: Utils.randomID(),
+      parentid: state.parentid,
+      origin: new Vector(x, y),
+      angle: (startAngle / 180) * Math.PI,
+      step: ((endAngle / 180) - (startAngle / 180)) * Math.PI / totalPoints,
+      maxAngle: (endAngle / 180) * Math.PI,
+      position: new Vector(x, y),
+      direction: state.direction,
+      radius: state.attackRadius * scaleModifier,
+      damage: state.damage,
+      critchance: state.critchance,
+      critdamage: state.critdamage
+    });
+  }
+
+  function _modifyAllAttackPoints() {
+    ATTACKS = ATTACKS.filter(cur => {
+      return (cur.angle < cur.maxAngle);
+    });
+
+    ATTACKS.forEach(point => {
+      let modifiedRadius = (point.direction === 'left') ? point.radius : -point.radius;
+
+      let x = point.origin.x + (modifiedRadius * Math.cos(point.angle));
+      let y = point.origin.y - point.radius * Math.sin(point.angle);
+
+      point.position = new Vector(x, y);
+      point.angle += point.step;
+    });
+  }
+
+  function _isActiveAttackFrame(state) {
+    return state.animations.activeAttackFrames.filter(i => {
+      return i === state.animations.currentIndex;
+    }).length > 0;
+  }
 
   /********************************************************************************
   * @Combat
@@ -444,7 +488,7 @@ const Characters = (function() {
     });
   }
 
-  function _isHitByAttack(state) {
+  function _isHitByAttackPoint(state) {
     ATTACKS.filter(cur => {
       if (state.id === cur.id) return false;
 
@@ -458,18 +502,24 @@ const Characters = (function() {
 
         if (state.id !== _getPlayerID()) Fx.create({
           type: 'explosion_effect_8',
-          position: state.position,
-          offsetX: _generateRandomNumberUpTo(10),
-          offsetY: _generateRandomNumberUpTo(state.hitbox.height - 20),
+          position: {
+            x: cur.position.x,
+            y: state.position.y
+          },
+          offsetX: 0,
+          offsetY: _generateRandomNumberUpTo(state.hitbox.height),
           id: state.id + _generateRandomNumberUpTo(3),
           parentid: state.id
         });
 
         if (state.id !== _getPlayerID()) Fx.create({
           type: 'blood_effect_2',
-          position: state.position,
-          offsetX: _generateRandomNumberUpTo(20),
-          offsetY: _generateRandomNumberUpTo(state.hitbox.height - 20),
+          position: {
+            x: cur.position.x,
+            y: state.position.y
+          },
+          offsetX: 0,
+          offsetY: _generateRandomNumberUpTo(state.hitbox.height),
           id: state.id + _generateRandomNumberUpTo(3),
           parentid: state.id
         });
@@ -519,11 +569,6 @@ const Characters = (function() {
     if (state.collision.hit('y')) state.velocity.set(state.velocity.x, 0);
     if (state.collision.hit('x')) state.velocity.set(0, state.velocity.y);
 
-    if (state.collision.hit('y') && !state.hasLanded) {
-      state.hasLanded = true;
-      // Fx.create('air_impact_1', state.position.x + (state.hitbox.width / 2) - 29, state.position.y + state.hitbox.height - 19, state.id + 1, state.id, false);
-    }
-
     state.velocity.multiply(dt);
     state.position.add(state.velocity);
     state.acceleration.multiply(0);
@@ -554,6 +599,10 @@ const Characters = (function() {
   /*****************************
   * UTILS
   ******************************/
+  function _isActivePlayer(id) {
+    return id === _getPlayerID();
+  }
+
   function _getPlayerID() {
     return 0;
   }
@@ -621,6 +670,7 @@ const Characters = (function() {
     return Math.abs(entityCenter - playerCenter);
   }
 
+  // REMOVE -> MOVED to UTILS
   function _generateRandomID() {
     return Math.floor(Math.random() * 100 * Math.random() * 100 * Math.random() * 100 * Math.random() * 100);
   }
@@ -628,6 +678,7 @@ const Characters = (function() {
   function _generateRandomNumberUpTo(max) {
     return Math.floor((Math.random() * max) + 1);
   }
+  // REMOVE -> MOVED to UTILS
 
   function followCharacterWithCamera() {
     return {
