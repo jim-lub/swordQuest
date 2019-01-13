@@ -10,7 +10,10 @@ const DevTools = (function() {
     function toggle(type, name) {
       let isChecked = (Controller.isEnabled(type, name)) ? 'checked' : '';
 
-      $(`#toggle-${type}-${name}`).html(`<input type="checkbox" id="${type}-${name}" ${isChecked}/> ${name}`);
+      let html = `<div class="devtools-toggle-container-label"><input type="checkbox" id="${type}-${name}" ${isChecked}/><label for="${type}-${name}"></label></div>
+                  <div class="devtools-toggle-container-name">${name}</div>`;
+
+      $(`#toggle-${type}-${name}`).html(html);
     }
 
     function listener() {
@@ -148,6 +151,14 @@ const DevTools = (function() {
   * @ Crunch some data.. and maybe display it.
   ********************************************************************************/
   const Abstractor = (function() {
+
+  }());
+
+  /********************************************************************************
+  * @Disabler ?
+  * @ Disable data / actions / visuals / .. everything!
+  ********************************************************************************/
+  const Disabler = (function() {
 
   }());
 

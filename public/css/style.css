@@ -8,13 +8,57 @@ html, body {
   background-color: #151826;
 }
 
+input[type=checkbox]{
+  float: left;
+	height: 0px;
+	width: 0px;
+	visibility: hidden;
+}
+
+label {
+	cursor: pointer;
+	text-indent: -9999px;
+	width: 40px;
+	height: 20px;
+	background: grey;
+	display: block;
+	border-radius: 10px;
+	position: relative;
+}
+
+label:after {
+	content: '';
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 15px;
+	height: 15px;
+	background: #fff;
+	border-radius: 10px;
+	transition: 0.3s;
+}
+
+input:checked + label {
+	background: #bada55;
+}
+
+input:checked + label:after {
+	left: calc(100% - 3px);
+	transform: translateX(-100%);
+}
+
+label:active:after {
+	width: 26px;
+}
+
+
 .box {
   float: left;
   min-width: 150px;
   padding: 10px;
   margin: 5px;
   border-radius: 10px;
-  background-color: #5b6c8c;
+  background-color: #f1f1f1;
 }
 
 .box-header-text {
@@ -25,12 +69,42 @@ html, body {
   border-bottom: 2px solid #EA4E47;
 }
 
-#testsuite-toggles-visuals {
+.devtools-box-wrapper {
+  float: left;
+  display: inline-block;
+  width: 250px;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 10px;
+  background-color: #f1f1f1;
 }
 
-#controls {
-
+.devtools-box-header-text {
+  padding: 2px;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  border-bottom: 2px solid #EA4E47;
 }
+
+.devtools-toggle-container-wrapper {
+  display: inline-block;
+  width: 250px;
+  border-bottom: 1px solid #cecece;
+}
+
+.devtools-toggle-container-label {
+  float: left;
+  margin-bottom: 5px;
+}
+
+.devtools-toggle-container-name {
+  float: left;
+  margin: 1px;
+  padding-left: 5px;
+}
+
+
 
 .controls-child {
   float: left;
@@ -45,5 +119,3 @@ html, body {
   width: 100%;
   font-weight: bold;
 }
-
-/* color: #1c1c1c; font-family: sans-serif; font-size: 11px; background-color: #f4f4f4; padding: 10px; width: 200px; border-radius: 10px; */

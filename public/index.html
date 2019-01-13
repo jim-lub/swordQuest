@@ -44,31 +44,31 @@
 
     <!-- UI -->
     <div id="container">
-      <div class="box">
-        <div class="box-header-text">Toggle visuals (dev only)</div>
-        <div id="testsuite-toggles-visuals">
-          <div id="toggle-visualizer-characterHitbox">Text</div>
+      <div class="devtools-box-wrapper">
+        <div class="devtools-box-header-text">Visualizer - DevTools</div>
+        <div>
+          <div id="toggle-visualizer-characterHitbox" class="devtools-toggle-container-wrapper"></div>
             <script>DevTools.Components.toggle('visualizer', 'characterHitbox');</script>
 
-          <div id="toggle-visualizer-characterCollisionPoints">Text</div>
+          <div id="toggle-visualizer-characterCollisionPoints" class="devtools-toggle-container-wrapper"></div>
             <script>DevTools.Components.toggle('visualizer', 'characterCollisionPoints');</script>
 
-          <div id="toggle-visualizer-characterFieldOfView">Text</div>
+          <div id="toggle-visualizer-characterFieldOfView" class="devtools-toggle-container-wrapper"></div>
             <script>DevTools.Components.toggle('visualizer', 'characterFieldOfView');</script>
 
-          <div id="toggle-visualizer-characterAttackRadius">Text</div>
+          <div id="toggle-visualizer-characterAttackRadius" class="devtools-toggle-container-wrapper"></div>
             <script>DevTools.Components.toggle('visualizer', 'characterAttackRadius');</script>
 
-          <div id="toggle-visualizer-characterAttackPoints">Text</div>
+          <div id="toggle-visualizer-characterAttackPoints" class="devtools-toggle-container-wrapper"></div>
             <script>DevTools.Components.toggle('visualizer', 'characterAttackPoints');</script>
 
         </div>
       </div>
 
-      <div class="box">
-        <div class="box-header-text">Data (dev only)</div>
+      <div class="devtools-box-wrapper">
+        <div class="devtools-box-header-text">Abstractor - DevTools</div>
         <div id="testsuite-data">
-          <div id="testsuite-amount-of-attackpoints"></div>
+          <div id="testsuite-amount-of-attackpoints" class="devtools-toggle-container-name"></div>
         </div>
       </div>
 

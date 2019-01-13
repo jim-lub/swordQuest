@@ -58,7 +58,7 @@ const Game = (function() {
     for (let i = 0; i < 10; i++) {
       LEVEL.push(new Tile({x: -300, y: 152 + (i * 32), width: 32, height: 32}));
     }
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 150; i++) {
       LEVEL.push(new Tile({x: spacingX, y: 480, width: 32, height: 32}));
       spacingX += 32;
     }
@@ -70,8 +70,8 @@ const Game = (function() {
       ],
       npcs: [
         {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 100, y: 200, attackRadius: 100, mass: 600},
-        {type: 'swordknight', width: 40, height: 65, health: 1500, x: 300, y: 200, attackRadius: 80, mass: 700}
-        // {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 500, y: 200, mass: 600}
+        {type: 'swordknight', width: 40, height: 65, health: 1500, x: 300, y: 200, attackRadius: 80, mass: 700},
+        {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 500, y: 200, mass: 600}
       ]
     });
 
