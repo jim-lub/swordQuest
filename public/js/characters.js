@@ -21,6 +21,13 @@ const Characters = (function() {
       data: ENTITIES.length
     });
 
+    DevTools.Input.emit({
+      a: Ctrls.isPressed('a'),
+      d: Ctrls.isPressed('d'),
+      space: Ctrls.isPressed('space'),
+      shift: Ctrls.isPressed('shift')
+    });
+
     ENTITIES.forEach((state, index) => {
       if (_isActivePlayer(state.id)) return;
       if (state.health <= 0) ENTITIES.splice(index, 1);
@@ -557,6 +564,20 @@ const Characters = (function() {
 
     if (state.collision.hit('y')) state.velocity.set(state.velocity.x, 0);
     if (state.collision.hit('x')) state.velocity.set(0, state.velocity.y);
+
+    if (state.id === _getPlayerID()) {
+      DevTools.Abstractor.emit({
+        name: 'playerAcceleration',
+        text: 'Player acceleration: ',
+        data: Math.round(state.acceleration.x) +' / '+ Math.round(state.acceleration.y)
+      });
+
+      DevTools.Abstractor.emit({
+        name: 'playerVelocity',
+        text: 'Player velocity: ',
+        data: Math.round(state.velocity.x) +' / '+ Math.round(state.velocity.y)
+      });
+    }
 
     state.velocity.multiply(dt);
     state.position.add(state.velocity);

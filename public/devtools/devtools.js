@@ -175,15 +175,23 @@ const DevTools = (function() {
   ********************************************************************************/
   const Input = (function(Ctrls) {
 
-    function isPressed(type, key) {
-      return Ctrls.isPressed(key);
+    function emit({a, d, space, shift}) {
+
+      if (a) $(`#devtools-controls-key-a`).addClass('devtools-controls-key-active');
+      else $(`#devtools-controls-key-a`).removeClass('devtools-controls-key-active');
+
+      if (d) $(`#devtools-controls-key-d`).addClass('devtools-controls-key-active');
+      else $(`#devtools-controls-key-d`).removeClass('devtools-controls-key-active');
+
+      if (space) $(`#devtools-controls-key-space`).addClass('devtools-controls-key-active');
+      else $(`#devtools-controls-key-space`).removeClass('devtools-controls-key-active');
+
+      if (shift) $(`#devtools-controls-key-shift`).addClass('devtools-controls-key-active');
+      else $(`#devtools-controls-key-shift`).removeClass('devtools-controls-key-active');
+
     }
 
-    function isClicked(type, btn) {
-      return Ctrls.isClicked(btn);
-    }
-
-    return { isPressed, isClicked };
+    return { emit };
   }());
 
   return { Components, Visualizer, Abstractor, Input };

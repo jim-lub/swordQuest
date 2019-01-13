@@ -11,7 +11,8 @@
 
   <body>
     <!-- <div id="content"><img src="assets/img/ui/loading.gif" alt=""></div> -->
-    <canvas id="canvas" width="928" height="540"></canvas>
+  <div id="container">
+    <div><canvas id="canvas" width="928" height="540" style="border-radius: 20px;"></canvas></div>
 
     <script src="/socket.io/socket.io.js"></script>
 
@@ -45,7 +46,7 @@
     <!--
     UI
     -->
-    <div id="container">
+    <div id="devtools-container">
 
       <!-- Visualizer DevTools -->
       <div class="devtools-box-wrapper">
@@ -74,6 +75,10 @@
       <div class="devtools-box-wrapper">
         <div class="devtools-box-header-text devtools-abstractor-color">Abstractor - DevTools</div>
         <div>
+          <div id="devtools-abstractor-playerVelocity" class="devtools-toggle-container-wrapper"></div>
+          <div id="devtools-abstractor-playerAcceleration" class="devtools-toggle-container-wrapper"></div>
+
+
           <div id="devtools-abstractor-activeAttackPointsCount" class="devtools-toggle-container-wrapper"></div>
           <div id="devtools-abstractor-activeCharactersCount" class="devtools-toggle-container-wrapper"></div>
           <div id="devtools-abstractor-activeFx" class="devtools-toggle-container-wrapper"></div>
@@ -82,18 +87,49 @@
 
 
       <!-- Input DevTools -->
-      <!-- <div class="devtools-box-wrapper">
+      <div class="devtools-controls-box-wrapper">
         <div class="devtools-box-header-text">Controls</div>
-        <script>DevTools.Input(new Controls());</script>
         <div>
-          <div id="toggle-visualizer-characterHitbox" class="devtools-toggle-container-wrapper"></div>
-            <script>DevTools.Components.toggle('visualizer', 'characterHitbox');</script>
+
+          <div class="devtools-controls-wrapper">
+            <div class="devtools-controls-name-container">Move</div>
+
+            <div class="devtools-controls-key-container">
+              <div id="devtools-controls-key-a" class="devtools-controls-key">A</div>
+              <div class="devtools-controls-key-filler">+</div>
+              <div id="devtools-controls-key-d" class="devtools-controls-key">D</div>
+            </div>
+          </div>
+
+          <div class="devtools-controls-wrapper">
+            <div class="devtools-controls-name-container">Jump</div>
+
+            <div class="devtools-controls-key-container">
+              <div id="devtools-controls-key-space" class="devtools-controls-key">SPACE</div>
+            </div>
+          </div>
+
+          <div class="devtools-controls-wrapper">
+            <div class="devtools-controls-name-container">Heal</div>
+
+            <div class="devtools-controls-key-container">
+              <div id="devtools-controls-key-shift" class="devtools-controls-key">SHIFT</div>
+            </div>
+          </div>
+
+          <div class="devtools-controls-wrapper">
+            <div class="devtools-controls-name-container">Attack</div>
+
+            <div class="devtools-controls-key-container">
+              <div class="devtools-controls-key-filler"><img src="assets/img/ui/leftmouseclick.png" alt="left mouse click"></div>
+            </div>
+          </div>
 
         </div>
-      </div> -->
+      </div>
 
       <!-- Controls -->
-      <div class="box">
+      <!-- <div class="box">
         <div class="box-header-text">Controls</div>
         <div id="controls">
           <div class="controls-child">
@@ -116,9 +152,11 @@
             <div class="controls-child-text">Heal</div>
           </div>
         </div>
-      </div>
+      </div> -->
 
     </div>
+
+  </div>
 
   </body>
 </html>
