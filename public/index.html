@@ -42,10 +42,14 @@
     <script src="js/index.js"></script>
 
 
-    <!-- UI -->
+    <!--
+    UI
+    -->
     <div id="container">
+
+      <!-- Visualizer DevTools -->
       <div class="devtools-box-wrapper">
-        <div class="devtools-box-header-text">Visualizer - DevTools</div>
+        <div class="devtools-box-header-text devtools-visualizer-color">Visualizer - DevTools</div>
         <div>
           <div id="toggle-visualizer-characterHitbox" class="devtools-toggle-container-wrapper"></div>
             <script>DevTools.Components.toggle('visualizer', 'characterHitbox');</script>
@@ -65,15 +69,30 @@
         </div>
       </div>
 
+
+      <!-- Abstractor DevTools -->
       <div class="devtools-box-wrapper">
-        <div class="devtools-box-header-text">Abstractor - DevTools</div>
+        <div class="devtools-box-header-text devtools-abstractor-color">Abstractor - DevTools</div>
         <div id="testsuite-data">
           <div id="testsuite-amount-of-attackpoints" class="devtools-toggle-container-name"></div>
         </div>
       </div>
 
+
+      <!-- Input DevTools -->
+      <!-- <div class="devtools-box-wrapper">
+        <div class="devtools-box-header-text">Controls</div>
+        <script>DevTools.Input(new Controls());</script>
+        <div>
+          <div id="toggle-visualizer-characterHitbox" class="devtools-toggle-container-wrapper"></div>
+            <script>DevTools.Components.toggle('visualizer', 'characterHitbox');</script>
+
+        </div>
+      </div> -->
+
+      <!-- Controls -->
       <div class="box">
-        <div class="box-header-text" style="border-color: #A9DB8E;">Controls</div>
+        <div class="box-header-text">Controls</div>
         <div id="controls">
           <div class="controls-child">
             <div><img src="assets/img/ui/leftmouseclick.png" alt="left mouse click"></div>

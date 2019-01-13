@@ -51,6 +51,11 @@ label:active:after {
 	width: 26px;
 }
 
+#container {
+  padding-top: 5px;
+  border-top: 1px solid #232323;
+}
+
 
 .box {
   float: left;
@@ -66,7 +71,7 @@ label:active:after {
   margin-bottom: 10px;
   font-weight: bold;
   font-size: 14px;
-  border-bottom: 2px solid #EA4E47;
+  border-bottom: 2px solid #4f4f4f;
 }
 
 .devtools-box-wrapper {
@@ -84,7 +89,7 @@ label:active:after {
   margin-bottom: 8px;
   font-weight: bold;
   font-size: 14px;
-  border-bottom: 2px solid #EA4E47;
+  border-bottom: 2px solid #4f4f4f;
 }
 
 .devtools-toggle-container-wrapper {
@@ -102,6 +107,17 @@ label:active:after {
   float: left;
   margin: 1px;
   padding-left: 5px;
+}
+
+.devtools-visualizer-color {
+  border-color: #56a1e2;
+}
+
+.devtools-abstractor-color {
+  border-color: #A9DB8E;
+}
+.devtools-disabler-color {
+  border-color: #EA4E47;
 }
 
 

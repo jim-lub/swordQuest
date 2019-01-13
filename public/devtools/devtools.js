@@ -26,6 +26,7 @@ const DevTools = (function() {
     return { toggle, listener };
   }());
 
+
   /********************************************************************************
   * @Controller ?
   * @ enable / disable
@@ -53,7 +54,6 @@ const DevTools = (function() {
 
     return { enable, disable, isEnabled };
   }());
-
 
 
   /********************************************************************************
@@ -145,7 +145,6 @@ const DevTools = (function() {
   }());
 
 
-
   /********************************************************************************
   * @Abstractor ?
   * @ Crunch some data.. and maybe display it.
@@ -153,6 +152,7 @@ const DevTools = (function() {
   const Abstractor = (function() {
 
   }());
+
 
   /********************************************************************************
   * @Disabler ?
@@ -162,5 +162,22 @@ const DevTools = (function() {
 
   }());
 
-  return { Components, Visualizer, Abstractor };
+  /********************************************************************************
+  * @Input ?
+  * @ Visualize keyPresses and mouseClicks
+  ********************************************************************************/
+  const Input = (function(Ctrls) {
+
+    function isPressed(type, key) {
+      return Ctrls.isPressed(key);
+    }
+
+    function isClicked(type, btn) {
+      return Ctrls.isClicked(btn);
+    }
+
+    return { isPressed, isClicked };
+  }());
+
+  return { Components, Visualizer, Abstractor, Input };
 }());
