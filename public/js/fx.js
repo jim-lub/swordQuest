@@ -8,6 +8,13 @@ const Fx = (function() {
   ********************************************************************************/
   function update() {
     _filter();
+
+    DevTools.Abstractor.emit({
+      name: 'activeFx',
+      text: 'Fx.Queue length: ',
+      data: Queue.length
+    });
+
     _loop();
   }
 

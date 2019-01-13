@@ -150,7 +150,14 @@ const DevTools = (function() {
   * @ Crunch some data.. and maybe display it.
   ********************************************************************************/
   const Abstractor = (function() {
+    function emit({name, text, data}) {
+      let html = `<div class="devtools-abstractor-container-name">${text}</div>
+                  <div class="devtools-abstractor-container-data">${data}</div>`;
 
+      $(`#devtools-abstractor-${name}`).html(html);
+    }
+
+    return { emit };
   }());
 
 

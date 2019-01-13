@@ -15,6 +15,12 @@ const Characters = (function() {
   function update(dt) {
     _updateAllAttackPoints();
 
+    DevTools.Abstractor.emit({
+      name: 'activeCharactersCount',
+      text: 'Total characters: ',
+      data: ENTITIES.length
+    });
+
     ENTITIES.forEach((state, index) => {
       if (_isActivePlayer(state.id)) return;
       if (state.health <= 0) ENTITIES.splice(index, 1);
@@ -109,7 +115,11 @@ const Characters = (function() {
       if (_isActivePlayer(state.id) && state.healCooldown > 0) state.healCooldown--;
       if (!_isActivePlayer(state.id)) state.animations.play(state.currentState, state.direction);
 
-      document.getElementById("testsuite-amount-of-attackpoints").innerHTML = 'Active hit points: ' + ATTACKS.length;
+      DevTools.Abstractor.emit({
+        name: 'activeAttackPointsCount',
+        text: 'Active attack points: ',
+        data: ATTACKS.length
+      });
 
       state.transitions[state.currentState].active();
       if (Ctrls.isPressed('shift') && _isActivePlayer(state.id)) state.heal();

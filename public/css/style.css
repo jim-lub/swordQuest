@@ -39,7 +39,7 @@ label:after {
 }
 
 input:checked + label {
-	background: #bada55;
+	background: #56a1e2;
 }
 
 input:checked + label:after {
@@ -114,10 +114,24 @@ label:active:after {
 }
 
 .devtools-abstractor-color {
-  border-color: #A9DB8E;
+  border-color: #9956e2;
 }
 .devtools-disabler-color {
   border-color: #EA4E47;
+}
+
+.devtools-abstractor-container-name {
+  float: left;
+}
+
+.devtools-abstractor-container-data {
+  float: right;
+  font-size: 10px;
+  font-weight: bold;
+  background-color: #cecece;
+  padding: 2px 6px 1px 6px;
+  border-radius: 3px;
+  margin-bottom: 5px;
 }
 
 
