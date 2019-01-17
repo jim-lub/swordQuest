@@ -32,8 +32,8 @@ const Fx = (function() {
   function _draw(ctx, state) {
     let data = state.currentData;
 
-    let x = (!state.followCharacter) ? Camera.convertXCoord(state.position.x) : Camera.convertXCoord(Characters.publishCharacterPosition(state.parentid).x);
-    let y = (!state.followCharacter) ? state.position.y : Characters.publishCharacterPosition(state.parentid).y;
+    let x = (!state.followCharacter) ? Camera.convertXCoord(state.position.x) : Camera.convertXCoord(Characters2.publishCharacterPosition(state.parentid).x);
+    let y = (!state.followCharacter) ? state.position.y : Characters2.publishCharacterPosition(state.parentid).y;
 
     ctx.drawImage(state.currentSprite,
                     data.sX,

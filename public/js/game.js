@@ -30,7 +30,7 @@ const Game = (function() {
     DevTools.Components.listener();
     Lvl.update();
 
-    Characters.update(dt);
+    Entities.update(dt);
     Fx.update();
     Camera.update();
 
@@ -41,7 +41,7 @@ const Game = (function() {
     ctx.clearRect(0, 0, 1280, 640);
 
     Lvl.render(ctx);
-    Characters.render(ctx);
+    Entities.render(ctx);
     Fx.render(ctx);
 
     ctx.fillStyle = 'black';
@@ -64,16 +64,11 @@ const Game = (function() {
     }
     Events.emit('tiles', LEVEL);
 
-    Characters.init({
-      player: [
-        {type: 'hero', width: 20, height: 35, health: 1000, x: 400, y: 300, mass: 100}
-      ],
-      npcs: [
-        {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 100, y: 200, attackRadius: 100, mass: 600},
-        {type: 'swordknight', width: 40, height: 65, health: 1500, x: 300, y: 200, attackRadius: 80, mass: 700},
-        {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 500, y: 200, mass: 600}
-      ]
-    });
+    Entities.init([
+      {type: 'hero', isPlayerControlled: true, spawnPosition: {x: 150, y: 150}},
+      {type: 'hellishsmith', spawnPosition: {x: 350, y: 150}},
+      {type: 'swordknight', spawnPosition: {x: 550, y: 150}},
+    ]);
 
     window.requestAnimationFrame(_loop.loop.bind(_loop));
   }
