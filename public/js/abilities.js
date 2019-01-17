@@ -2,25 +2,37 @@
 const Abilities = (function() {
 
   /********************************************************************************
-  * @Abilities
-  * @
+  * @ Abilities:
+  * -------------------------------------------------------------------------------
+  * @SwordSlash: a circular sword attack emitting from the character. Characters with a bigger radius will emit more patterns.
   ********************************************************************************/
   const canSwordSlash = (state) => ({
     swordSlash: () => {
       if(_isActiveAttackFrame(state)) {
-        _emitAttackPoint(_circularPattern(state, {
+        _emitAttackPattern(_circularPattern(state, {
           startAngle: 100,
           endAngle: 170,
           scaleModifier: 1,
           pointsToEmit: 10
+        }));
+
+        _emitAttackPattern(_circularPattern(state, {
+          startAngle: 110,
+          endAngle: 150,
+          scaleModifier: 0.8,
+          pointsToEmit: 5
         }));
       }
     }
   });
 
   /********************************************************************************
-  * @Patterns
-  * @
+  * @ Circular Pattern:
+  * -------------------------------------------------------------------------------
+  * @startAngle: attackPoints will start emitting from this angle
+  * @endAngle: attackPoints will fade when they have reached this angle
+  * @scaleModifier: attackPoints will flow over the edge of the characters' `attackRadius`. To shrink or expand this edge modify this var with a value between `0.1` and `2.0`. Default: 1
+  * @pointToEmit: amount of attackPoints to emit. Increasing this number will result in more possible hits on other characters. Default: 10
   ********************************************************************************/
   function _circularPattern(state, {startAngle, endAngle, scaleModifier = 1, pointsToEmit = 10}) {
     let originX = state.position.x + state.hitbox.width / 2;
@@ -58,10 +70,12 @@ const Abilities = (function() {
   }
 
   /********************************************************************************
-  * @Utilities
-  * @
+  * @ Utilities
+  * -------------------------------------------------------------------------------
+  * @_emitAttackPattern: sends the pattern to the entities module
+  * @_isActiveAttackFrame: checks the animation frame to see if a new pattern should be emitted
   ********************************************************************************/
-  function _emitAttackPoint(point) {
+  function _emitAttackPattern(point) {
       Entities.newAttackPoint(point);
   }
 

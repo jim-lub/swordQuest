@@ -36,8 +36,9 @@ const Characters = (function() {
 
 
   /********************************************************************************
-  * @Defaults
-  * @
+  * @ Defaults
+  * -------------------------------------------------------------------------------
+  * @hasDefaults: contains variables and function that are applied to every character
   ********************************************************************************/
   const hasDefaults = (state) => ({
     id: Utils.randomID(),
@@ -89,8 +90,11 @@ const Characters = (function() {
 
 
   /********************************************************************************
-  * @Types
-  * @ Hero / HellishSmith / SwordKnight
+  * @ Types
+  * -------------------------------------------------------------------------------
+  * @Hero: Default player character; idle - run - jump - fall - attack
+  * @HellishSmith: Enemy character; idle - run - attack
+  * @SwordKnight: Enemy character; idle - run - attack
   ********************************************************************************/
   const isHero = (state) => ({
     health: 1000,
@@ -203,8 +207,12 @@ const Characters = (function() {
 
 
   /********************************************************************************
-  * @Actions
-  * @ Idle / Run / Attack / Jump / Fall
+  * @ Actions
+  * -------------------------------------------------------------------------------
+  * @Idle: -
+  * @Run: -
+  * @Jump / @Fall: -
+  * @Attack: -
   ********************************************************************************/
   const canIdle = (state) => ({
     idle: () => {
@@ -322,8 +330,12 @@ const Characters = (function() {
 
 
   /********************************************************************************
-  * @Utility
-  * @
+  * @ Utility
+  * -------------------------------------------------------------------------------
+  * @_updateDirection: -
+  * @_distanceToPlayer: -
+  * @_getPlayerData: -
+  * @_getEntities: -
   ********************************************************************************/
   function _updateDirection(state) {
     if (state.isPlayerControlled) {
