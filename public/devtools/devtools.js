@@ -38,7 +38,7 @@ const DevTools = (function() {
         characterCollisionPoints: false,
         characterFieldOfView: false,
         characterAttackRadius: false,
-        characterAttackPoints: false
+        characterAttackPoints: true
       },
 
       abstractor: {

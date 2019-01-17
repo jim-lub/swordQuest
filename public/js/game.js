@@ -65,9 +65,9 @@ const Game = (function() {
     Events.emit('tiles', LEVEL);
 
     Entities.init([
-      {type: 'hero', isPlayerControlled: true, spawnPosition: {x: 150, y: 150}},
-      {type: 'hellishsmith', spawnPosition: {x: 350, y: 150}},
+      {type: 'hellishsmith', spawnPosition: {x: 150, y: 150}},
       {type: 'swordknight', spawnPosition: {x: 550, y: 150}},
+      {type: 'hero', isPlayerControlled: true, spawnPosition: {x: 350, y: 150}}
     ]);
 
     window.requestAnimationFrame(_loop.loop.bind(_loop));

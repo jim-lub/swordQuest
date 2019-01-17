@@ -2,7 +2,6 @@
 class CollisionDetection {
   constructor() {
     this.tiles = [];
-    this.entities = [];
     this.collisionPoints = [];
     this.x = false;
     this.y = false;
@@ -10,7 +9,7 @@ class CollisionDetection {
 
   update(id, pos, vel, width, height) {
     this.tiles = Events.listen('tiles');
-    this.entities = Entities.ENTITIES;
+    this.entities = Entities.getAllEntities();
     this.x = false;
     this.y = false;
 

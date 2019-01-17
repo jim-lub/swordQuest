@@ -12,10 +12,25 @@ const Characters = (function() {
       }
     };
 
-    if (state.isPlayerControlled) {
-      return Object.assign(state, ...[hasDefaults(state), canRender(state), isHero(state), canIdle(state), canRun(state), canJump(state), canAttack(state)]);
-    } else {
-      return Object.assign(state, ...[hasDefaults(state), canRender(state), isHellishSmith(state), canIdle(state), canRun(state), canAttack(state)]);
+    if (type === 'hero') {
+      return Object.assign(state,
+            ...[hasDefaults(state), canRender(state), isHero(state)],
+            ...[canIdle(state), canRun(state), canJump(state), canAttack(state)],
+            ...[Abilities.canSwordSlash(state)]);
+    }
+
+    if (type === 'hellishsmith') {
+      return Object.assign(state,
+            ...[hasDefaults(state), canRender(state), isHellishSmith(state)],
+            ...[canIdle(state), canRun(state), canAttack(state)],
+            ...[Abilities.canSwordSlash(state)]);
+    }
+
+    if (type === 'swordknight') {
+      return Object.assign(state,
+            ...[hasDefaults(state), canRender(state), isSwordKnight(state)],
+            ...[canIdle(state), canRun(state), canAttack(state)],
+            ...[Abilities.canSwordSlash(state)]);
     }
   }
 
@@ -32,8 +47,8 @@ const Characters = (function() {
     acceleration: new Vector(),
     verticalAcceleration: new Vector(),
 
-    direction: 'right',
-    directionInt: 1,
+    direction: state.direction || 'left',
+    directionInt: state.directionInt || -1,
 
     collision: new CollisionDetection(),
 
@@ -88,7 +103,9 @@ const Characters = (function() {
       width: 20,
       height: 35
     },
+    speed: 15000,
     mass: 100,
+    attackRadius: 60,
 
     transitions: {
       'idle': {
@@ -125,7 +142,10 @@ const Characters = (function() {
       width: 40,
       height: 75
     },
+    speed: 25000,
     mass: 1000,
+    fov: 150,
+    attackRadius: 75,
 
     transitions: {
       'idle': {
@@ -157,7 +177,10 @@ const Characters = (function() {
       width: 40,
       height: 65
     },
+    speed: 25000,
     mass: 700,
+    fov: 200,
+    attackRadius: 75,
 
     transitions: {
       'idle': {
@@ -189,6 +212,7 @@ const Characters = (function() {
 
         if (Ctrls.isClicked('leftClick')) {
           state.animations.play('attack', state.direction);
+          state.attack();
         } else {
           state.animations.play('idle', state.direction);
         }
@@ -197,6 +221,13 @@ const Characters = (function() {
         if (Ctrls.isPressed('space')) state.dispatch('jump');
 
       } else {
+
+        if (Math.abs(state.velocity.x) > 0) state.dispatch('run');
+
+        let distance = _distanceToPlayer(state);
+
+        if (distance > state.attackRadius && distance < state.fov) state.dispatch('run');
+        if (distance < state.attackRadius) state.dispatch('attack');
 
       }
     }
@@ -208,6 +239,7 @@ const Characters = (function() {
 
         if (Ctrls.isClicked('leftClick')) {
           state.animations.play('attack_run', state.direction);
+          state.attack();
         } else {
           state.animations.play('run', state.direction);
         }
@@ -215,12 +247,19 @@ const Characters = (function() {
         if (Ctrls.isPressed('space')) state.dispatch('jump');
 
         if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
-          state.applyForce(new Vector(15000 * state.directionInt, 0));
+          state.applyForce(new Vector(state.speed * state.directionInt, 0));
         } else {
           if (state.velocity.x === 0) state.dispatch('idle');
         }
 
       } else {
+
+        if (Math.abs(state.velocity.x) === 0) state.dispatch('idle');
+
+        let distance = _distanceToPlayer(state);
+
+        if (distance > state.attackRadius && distance < state.fov) state.applyForce(new Vector(state.speed * -state.directionInt, 0));
+        if (distance < state.attackRadius) state.dispatch('attack');
 
       }
     }
@@ -232,6 +271,7 @@ const Characters = (function() {
 
         if (Ctrls.isClicked('leftClick')) {
           state.animations.play('attack_jump', state.direction);
+          state.attack();
         } else {
           state.animations.play('jump', state.direction);
         }
@@ -244,7 +284,7 @@ const Characters = (function() {
         }
 
       } else {
-
+        // Currently not avaible for non-player characters
       }
     },
 
@@ -253,6 +293,7 @@ const Characters = (function() {
 
         if (Ctrls.isClicked('leftClick')) {
           state.animations.play('attack_jump', state.direction);
+          state.attack();
         } else {
           state.animations.play('fall', state.direction);
         }
@@ -264,18 +305,17 @@ const Characters = (function() {
         }
 
       } else {
-
+          // Currently not avaible for non-player characters
       }
     }
   });
 
   const canAttack = (state) => ({
     attack: () => {
-      console.log('attacking');
       if (state.isPlayerControlled) {
-
+        state.swordSlash();
       } else {
-
+        state.swordSlash();
       }
     }
   });
@@ -292,11 +332,37 @@ const Characters = (function() {
         state.direction = (Ctrls.lastKeyPressed('a', 'd')) ? 'left' : 'right';
       }
     } else {
-      // let direction = Math.sign(state.position.x - _getPlayerPosition().x);
-      let direction = 1;
-      state.directionInt = direction;
-      state.direction = (direction === 1) ? 'left' : 'right';
+      if (_distanceToPlayer(state) < state.fov) {
+        let direction = Math.sign(state.position.x - _getPlayerData().position.x);
+        state.directionInt = direction;
+        state.direction = (direction === 1) ? 'left' : 'right';
+      }
     }
+  }
+
+  function _distanceToPlayer(state) {
+    let player = _getPlayerData();
+
+    if (player) {
+      let entityCenter = state.position.x + state.hitbox.width / 2;
+      let playerCenter = player.position.x + player.hitbox.width / 2;
+
+      return Math.abs(entityCenter - playerCenter);
+    } else {
+      return 0;
+    }
+  }
+
+  function _getPlayerData() {
+    let player = _getEntities().filter(state => state.isPlayerControlled);
+
+    if (player) {
+      return player[0];
+    }
+  }
+
+  function _getEntities() {
+    return Entities.getAllEntities();
   }
 
 
@@ -310,6 +376,23 @@ const Characters = (function() {
     render: (ctx) => {
       let currentFrame = state.animations.currentData;
 
+      DevTools.Visualizer.start('characterFieldOfView', ctx, {
+        x: Camera.convertXCoord(state.position.x),
+        y: state.position.y,
+        width: state.hitbox.width,
+        height: state.hitbox.height,
+        fov: state.fov || 0
+      });
+
+      DevTools.Visualizer.start('characterAttackRadius', ctx, {
+        x: Camera.convertXCoord(state.position.x),
+        y: state.position.y,
+        width: state.hitbox.width,
+        height: state.hitbox.height,
+        attackRadius: state.attackRadius || 0
+      });
+
+
       ctx.drawImage(state.animations.currentSprite,
                     currentFrame.sX,
                     currentFrame.sY,
@@ -318,6 +401,19 @@ const Characters = (function() {
                     Math.round(Camera.convertXCoord(state.position.x) + currentFrame.offsetX),
                     Math.round(state.position.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
+
+
+      DevTools.Visualizer.start('characterHitbox', ctx, {
+        x: Camera.convertXCoord(state.position.x),
+        y: state.position.y,
+        width: state.hitbox.width,
+        height: state.hitbox.height
+      });
+
+      DevTools.Visualizer.start('characterCollisionPoints', ctx, {
+        offsetX: Camera.convertXCoord(0),
+        collisionPoints: state.collision.collisionPoints
+      });
     }
   });
 

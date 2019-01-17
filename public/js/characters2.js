@@ -41,7 +41,7 @@ const Characters2 = (function() {
 
     DevTools.Visualizer.start('characterAttackPoints', ctx, {
       offsetX: Camera.convertXCoord(0),
-      attackPoints: ATTACKS
+      attackPoints: ATTACKS1
     });
   }
 
