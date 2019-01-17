@@ -38,7 +38,8 @@ const DevTools = (function() {
         characterCollisionPoints: false,
         characterFieldOfView: false,
         characterAttackRadius: false,
-        characterAttackPoints: false
+        characterAttackPoints: false,
+        characterHealPoints: false
       },
 
       abstractor: {
@@ -67,7 +68,8 @@ const DevTools = (function() {
         'characterCollisionPoints': (ctx, data) => characterCollisionPoints(ctx, data),
         'characterFieldOfView': (ctx, data) => characterFieldOfView(ctx, data),
         'characterAttackRadius': (ctx, data) => characterAttackRadius(ctx, data),
-        'characterAttackPoints': (ctx, data) => characterAttackPoints(ctx, data)
+        'characterAttackPoints': (ctx, data) => characterAttackPoints(ctx, data),
+        'characterHealPoints': (ctx, data) => characterHealPoints(ctx, data)
       };
 
       const transition = transitions[name];
@@ -136,6 +138,18 @@ const DevTools = (function() {
         ctx.fillStyle = "purple";
 
         attackPoints.forEach(point => {
+          ctx.fillRect(Math.round(point.position.x + offsetX - 2), Math.round(point.position.y - 2), 4, 4);
+        });
+      ctx.restore();
+    }
+
+    function characterHealPoints(ctx, {offsetX, healPoints}) {
+      if (!Controller.isEnabled('visualizer', 'characterHealPoints')) return;
+
+      ctx.save();
+        ctx.fillStyle = "lime";
+
+        healPoints.forEach(point => {
           ctx.fillRect(Math.round(point.position.x + offsetX - 2), Math.round(point.position.y - 2), 4, 4);
         });
       ctx.restore();

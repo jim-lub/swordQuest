@@ -32,8 +32,8 @@ const Fx = (function() {
   function _draw(ctx, state) {
     let data = state.currentData;
 
-    let x = (!state.followCharacter) ? Camera.convertXCoord(state.position.x) : Camera.convertXCoord(Characters.publishCharacterPosition(state.parentid).x);
-    let y = (!state.followCharacter) ? state.position.y : Characters.publishCharacterPosition(state.parentid).y;
+    let x = (!state.followCharacter) ? Camera.convertXCoord(state.position.x) : Camera.convertXCoord(Characters2.publishCharacterPosition(state.parentid).x);
+    let y = (!state.followCharacter) ? state.position.y : Characters2.publishCharacterPosition(state.parentid).y;
 
     ctx.drawImage(state.currentSprite,
                     data.sX,
@@ -53,7 +53,7 @@ const Fx = (function() {
   ********************************************************************************/
   const Queue = [];
 
-  function create({type, position, offsetX, offsetY, id, parentid, loop, followCharacter}) {
+  function create({type, position, offsetX, offsetY, id, parentid, limit, startOnTickCount, loop, followCharacter}) {
     let state = {
         type: type,
         position: new Vector(position.x, position.y),
@@ -63,7 +63,9 @@ const Fx = (function() {
         },
         id: id,
         parentid: parentid,
+        limit: limit + startOnTickCount || 500,
         loop: loop || false,
+        startOnTickCount: startOnTickCount || 0,
         followCharacter: followCharacter || false
     };
 
@@ -75,7 +77,7 @@ const Fx = (function() {
   }
 
   const _newFx = (state) => ({
-    tickCount: 0,
+    tickCount: state.startOnTickCount,
     ticksPerSequence: _getTicksPerSequence(state),
     currentData: {},
     currentIndex: 0,
@@ -93,7 +95,7 @@ const Fx = (function() {
 
   function _filter() {
     Queue.forEach((state, index) => {
-      if (!state.loop && state.tickCount >= state.ticksPerSequence) Queue.splice(index, 1);
+      if (!state.loop && state.tickCount >= state.ticksPerSequence || state.tickCount > state.limit) Queue.splice(index, 1);
     });
   }
 

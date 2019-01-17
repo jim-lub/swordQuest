@@ -6,20 +6,22 @@ const Camera = (function() {
   };
 
   function update() {
-    let player = Characters.followCharacterWithCamera();
-    let pos = player.position;
-    let direction = player.direction;
-    let vel = player.velocity;
+    // let player = Enities.followCharacterWithCamera();
+    // let pos = player.position;
+    // let direction = player.direction;
+    // let vel = player.velocity;
+    //
+    // if (pos.x <= 200 && direction === 'left') {
+    //   data.offsetX += vel.x;
+    // }
+    //
+    // if (pos.x >= 700 && direction === 'right') {
+    //   data.offsetX += vel.x;
+    // }
+    //
+    // Events.emit('CAMERA_OFFSET_X', data.offsetX);
 
-    if (pos.x <= 200 && direction === 'left') {
-      data.offsetX += vel.x;
-    }
-
-    if (pos.x >= 700 && direction === 'right') {
-      data.offsetX += vel.x;
-    }
-
-    Events.emit('CAMERA_OFFSET_X', data.offsetX);
+    Events.emit('CAMERA_OFFSET_X', 0);
   }
 
   function convertXCoord(coordinate) {

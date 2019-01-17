@@ -23,7 +23,11 @@
 
     <script src="js/vector.js"></script>
     <script src="js/collision-detection.js"></script>
+
+    <script src="js/abilities.js"></script>
     <script src="js/characters.js"></script>
+    <script src="js/entities.js"></script>
+    <script src="js/combat.js"></script>
 
     <script src="js/parallax.js"></script>
     <script src="js/level.js"></script>
@@ -67,6 +71,9 @@
           <div id="toggle-visualizer-characterAttackPoints" class="devtools-toggle-container-wrapper"></div>
             <script>DevTools.Components.toggle('visualizer', 'characterAttackPoints');</script>
 
+            <div id="toggle-visualizer-characterHealPoints" class="devtools-toggle-container-wrapper"></div>
+              <script>DevTools.Components.toggle('visualizer', 'characterHealPoints');</script>
+
         </div>
       </div>
 
@@ -75,12 +82,9 @@
       <div class="devtools-box-wrapper">
         <div class="devtools-box-header-text devtools-abstractor-color">Abstractor - DevTools</div>
         <div>
-          <div id="devtools-abstractor-playerVelocity" class="devtools-toggle-container-wrapper"></div>
-          <div id="devtools-abstractor-playerAcceleration" class="devtools-toggle-container-wrapper"></div>
-
-
-          <div id="devtools-abstractor-activeAttackPointsCount" class="devtools-toggle-container-wrapper"></div>
-          <div id="devtools-abstractor-activeCharactersCount" class="devtools-toggle-container-wrapper"></div>
+          <div id="devtools-abstractor-activeAttackPoints" class="devtools-toggle-container-wrapper"></div>
+          <div id="devtools-abstractor-activeHealPoints" class="devtools-toggle-container-wrapper"></div>
+          <div id="devtools-abstractor-activeEntities" class="devtools-toggle-container-wrapper"></div>
           <div id="devtools-abstractor-activeFx" class="devtools-toggle-container-wrapper"></div>
         </div>
       </div>

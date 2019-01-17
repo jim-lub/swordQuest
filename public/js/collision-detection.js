@@ -2,7 +2,6 @@
 class CollisionDetection {
   constructor() {
     this.tiles = [];
-    this.entities = [];
     this.collisionPoints = [];
     this.x = false;
     this.y = false;
@@ -10,7 +9,7 @@ class CollisionDetection {
 
   update(id, pos, vel, width, height) {
     this.tiles = Events.listen('tiles');
-    this.entities = Characters.ENTITIES;
+    this.entities = Entities.getAllEntities();
     this.x = false;
     this.y = false;
 
@@ -20,6 +19,8 @@ class CollisionDetection {
     this.collisionPoints = this.hitbox(pos, {x: vel.x, y: vel.y}, width, height);
 
     this.tiles.forEach(tile => {
+      if (Math.abs(hitboxX - pos.x) > 150) return;
+
       if (this.boxCollision(hitboxX, tile)) this.x = true;
       if (this.boxCollision(hitboxY, tile)) this.y = true;
     });
