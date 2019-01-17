@@ -19,6 +19,8 @@ class CollisionDetection {
     this.collisionPoints = this.hitbox(pos, {x: vel.x, y: vel.y}, width, height);
 
     this.tiles.forEach(tile => {
+      if (Math.abs(hitboxX - pos.x) > 150) return;
+
       if (this.boxCollision(hitboxX, tile)) this.x = true;
       if (this.boxCollision(hitboxY, tile)) this.y = true;
     });

@@ -14,21 +14,21 @@ const Characters = (function() {
 
     if (type === 'hero') {
       return Object.assign(state,
-            ...[hasDefaults(state), canRender(state), isHero(state)],
+            ...[hasDefaults(state), canRender(state), canBeHit(state), canBeHealed(state), isHero(state)],
             ...[canIdle(state), canRun(state), canJump(state), canAttack(state)],
-            ...[Abilities.canSwordSlash(state)]);
+            ...[Abilities.canSwordSlash(state), Abilities.canHeal(state)]);
     }
 
     if (type === 'hellishsmith') {
       return Object.assign(state,
-            ...[hasDefaults(state), canRender(state), isHellishSmith(state)],
+            ...[hasDefaults(state), canRender(state), canBeHit(state), isHellishSmith(state)],
             ...[canIdle(state), canRun(state), canAttack(state)],
             ...[Abilities.canSwordSlash(state)]);
     }
 
     if (type === 'swordknight') {
       return Object.assign(state,
-            ...[hasDefaults(state), canRender(state), isSwordKnight(state)],
+            ...[hasDefaults(state), canRender(state), canBeHit(state), isSwordKnight(state)],
             ...[canIdle(state), canRun(state), canAttack(state)],
             ...[Abilities.canSwordSlash(state)]);
     }
@@ -57,17 +57,19 @@ const Characters = (function() {
 
     update: (dt) => {
       _updateDirection(state);
-      if (!state.isPlayerControlled) state.animations.play(state.currentState, state.direction); // TEMP
-
-      state.transitions[state.currentState].active();
-
       _updatePhysics(state, dt);
+
+      state.checkForHits();
+
+      if (state.isPlayerControlled) state.checkForHeals();
+      if (!state.isPlayerControlled) state.animations.play(state.currentState, state.direction);
+
+      state[state.currentState](); // Call current state function
     },
 
     currentState: 'idle',
 
     dispatch: (actionName) => {
-      const actions = state.transitions[state.currentState];
       const action = state.transitions[state.currentState][actionName];
 
       if (action) action.apply(state);
@@ -90,18 +92,21 @@ const Characters = (function() {
 
 
   /********************************************************************************
-  * @ Types
+  * @ Types - Type specific defaults & transitions
   * -------------------------------------------------------------------------------
   * @Hero: Default player character; idle - run - jump - fall - attack
   * @HellishSmith: Enemy character; idle - run - attack
   * @SwordKnight: Enemy character; idle - run - attack
   ********************************************************************************/
   const isHero = (state) => ({
-    health: 1000,
+    health: {
+      current: 1000,
+      max: 1500
+    },
     damage: {
       base: 1,
       criticalHitChance: 5,
-      criticalHitDamage: 2.5
+      criticalHitDamage: 5
     },
     hitbox: {
       width: 20,
@@ -113,34 +118,33 @@ const Characters = (function() {
 
     transitions: {
       'idle': {
-        active() { state.idle(); },
         run() { state.changeStateTo('run'); },
         jump() { state.changeStateTo('jump'); },
         fall() { state.changeStateTo('fall'); }
       },
       'run': {
-        active() { state.run(); },
         idle() { state.changeStateTo('idle'); },
         jump() {state.changeStateTo('jump'); },
         fall() { state.changeStateTo('fall'); }
       },
       'jump': {
-        active() { state.jump(); },
         fall() { state.changeStateTo('fall'); }
       },
       'fall': {
-        active() { state.fall(); },
         idle() { state.changeStateTo('idle'); }
       }
     }
   });
 
   const isHellishSmith = (state) => ({
-    health: 2500,
+    health: {
+      current: 2500,
+      max: 2500
+    },
     damage: {
-      base: 2,
-      criticalHitChance: 3.5,
-      criticalHitDamage: 5
+      base: 4,
+      criticalHitChance: 10.5,
+      criticalHitDamage: 10
     },
     hitbox: {
       width: 40,
@@ -153,17 +157,14 @@ const Characters = (function() {
 
     transitions: {
       'idle': {
-        active() { state.idle(); },
         run() { state.changeStateTo('run'); },
         attack() { state.changeStateTo('attack'); }
       },
       'run': {
-        active() { state.run(); },
         idle() { state.changeStateTo('idle'); },
         attack() { state.changeStateTo('attack'); }
       },
       'attack': {
-        active() { state.attack(); },
         idle() { state.changeStateTo('idle'); },
         run() { state.changeStateTo('run'); }
       }
@@ -171,11 +172,14 @@ const Characters = (function() {
   });
 
   const isSwordKnight = (state) => ({
-    health: 1500,
+    health: {
+      current: 1500,
+      max: 1500
+    },
     damage: {
       base: 3,
       criticalHitChance: 5.5,
-      criticalHitDamage: 4
+      criticalHitDamage: 5
     },
     hitbox: {
       width: 40,
@@ -183,22 +187,19 @@ const Characters = (function() {
     },
     speed: 25000,
     mass: 700,
-    fov: 200,
-    attackRadius: 75,
+    fov: 170,
+    attackRadius: 85,
 
     transitions: {
       'idle': {
-        active() { state.idle(); },
         run() { state.changeStateTo('run'); },
         attack() { state.changeStateTo('attack'); }
       },
       'run': {
-        active() { state.run(); },
         idle() { state.changeStateTo('idle'); },
         attack() { state.changeStateTo('attack'); }
       },
       'attack': {
-        active() { state.attack(); },
         idle() { state.changeStateTo('idle'); },
         run() { state.changeStateTo('run'); }
       }
@@ -217,6 +218,7 @@ const Characters = (function() {
   const canIdle = (state) => ({
     idle: () => {
       if (state.isPlayerControlled) {
+        if (Ctrls.isPressed('shift')) state.heal();
 
         if (Ctrls.isClicked('leftClick')) {
           state.animations.play('attack', state.direction);
@@ -244,6 +246,7 @@ const Characters = (function() {
   const canRun = (state) => ({
     run: () => {
       if (state.isPlayerControlled) {
+        if (Ctrls.isPressed('shift')) state.heal();
 
         if (Ctrls.isClicked('leftClick')) {
           state.animations.play('attack_run', state.direction);
@@ -276,6 +279,7 @@ const Characters = (function() {
   const canJump = (state) => ({
     jump: () => {
       if (state.isPlayerControlled) {
+        if (Ctrls.isPressed('shift')) state.heal();
 
         if (Ctrls.isClicked('leftClick')) {
           state.animations.play('attack_jump', state.direction);
@@ -298,6 +302,7 @@ const Characters = (function() {
 
     fall: () => {
       if (state.isPlayerControlled) {
+        if (Ctrls.isPressed('shift')) state.heal();
 
         if (Ctrls.isClicked('leftClick')) {
           state.animations.play('attack_jump', state.direction);
@@ -323,7 +328,70 @@ const Characters = (function() {
       if (state.isPlayerControlled) {
         state.swordSlash();
       } else {
+        let distance = _distanceToPlayer(state);
+        if (distance > state.attackRadius) state.dispatch('idle');
+
         state.swordSlash();
+      }
+    }
+  });
+
+  /********************************************************************************
+  * @ Combat
+  * -------------------------------------------------------------------------------
+  * @canBeHit: -
+  * @canBeHealed: -
+  ********************************************************************************/
+  const canBeHit = (state) => ({
+    checkForHits: () => {
+      let hits = Combat.filterAttackPoints(state);
+
+      if (hits) {
+        hits.forEach(hit => {
+          state.health.current -= hit.damage;
+
+          if (hit.isCrit) {
+            Fx.create({
+                type: 'blood_effect_2',
+                position: {
+                  x: hit.position.x,
+                  y: state.position.y
+                },
+                offsetX: 0,
+                offsetY: Utils.randomNumberBetween(10, (state.hitbox.height - 10)),
+                id: state.id,
+                parentid: state.id
+            });
+
+            Fx.create({
+                type: 'blood_effect_1',
+                position: {
+                  x: hit.position.x,
+                  y: state.position.y
+                },
+                offsetX: 0,
+                offsetY: Utils.randomNumberBetween(10, (state.hitbox.height - 10)),
+                id: state.id,
+                parentid: state.id
+            });
+          }
+        });
+      }
+    }
+  });
+
+  const canBeHealed = (state) => ({
+    checkForHeals: () => {
+      let heals = Combat.filterHealPoints(state);
+
+      if (state.health.current <= state.health.max && heals) {
+        heals.forEach(heal => {
+          state.health.current += heal.heal;
+
+          if (heal.isCrit) {
+            // insert critical heal effects
+          }
+        });
       }
     }
   });
@@ -335,6 +403,7 @@ const Characters = (function() {
   * @_updateDirection: -
   * @_distanceToPlayer: -
   * @_getPlayerData: -
+  * @_healthPercentage: -
   * @_getEntities: -
   ********************************************************************************/
   function _updateDirection(state) {
@@ -368,10 +437,21 @@ const Characters = (function() {
   function _getPlayerData() {
     let player = _getEntities().filter(state => state.isPlayerControlled);
 
-    if (player) {
+    if (player && player.length > 0) {
+      // if active player return data
       return player[0];
+    } else {
+      // if no active player return an empty object with zero'd data
+      return {
+        position: {x: 0,y: 0},
+        hitbox: {width: 0,height: 0}
+      };
     }
   }
+
+  function _healthPercentage(state) {
+    return state.health.current / state.health.max;
+}
 
   function _getEntities() {
     return Entities.getAllEntities();
@@ -404,7 +484,7 @@ const Characters = (function() {
         attackRadius: state.attackRadius || 0
       });
 
-
+      // Draw characters
       ctx.drawImage(state.animations.currentSprite,
                     currentFrame.sX,
                     currentFrame.sY,
@@ -413,6 +493,23 @@ const Characters = (function() {
                     Math.round(Camera.convertXCoord(state.position.x) + currentFrame.offsetX),
                     Math.round(state.position.y + currentFrame.offsetY),
                     currentFrame.sWidth, currentFrame.sHeight);
+
+      // Draw healthbar
+      let healthbarMultiplier = (_healthPercentage(state) < 1) ? _healthPercentage(state) : 0.99;
+      ctx.drawImage(Assets.img('ui', 'healthbars'),
+                    0,
+                    180 - (Math.floor(healthbarMultiplier * 10 + 1) * 18),
+                    73,
+                    18,
+                    Math.round(Camera.convertXCoord(state.position.x) + (state.hitbox.width / 2) - 37),
+                    Math.round(state.position.y - 50),
+                    73, 18);
+
+      // Draw health
+      ctx.fillStyle = (state.isPlayerControlled) ? "lime" : "red";
+      ctx.font = "bold 10px Verdana";
+      ctx.fillText(Math.floor(state.health.current), Camera.convertXCoord(state.position.x + (state.hitbox.width / 2) - 36), state.position.y - 52);
+
 
 
       DevTools.Visualizer.start('characterHitbox', ctx, {
