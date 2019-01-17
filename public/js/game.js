@@ -9,19 +9,18 @@ const Game = (function() {
     now: null,
     dt: 0,
     last: null,
-    step: 1/60,
+    step: 1000/60,
     loop() {
-      this.now = _timestamp();
-      this.dt = this.dt + Math.min(1, (this.now - this.last) / 1000);
+      this.timestamp = _timestamp();
+      this.dt += this.timestamp - this.last;
+      this.last = this.timestamp;
 
-      while (this.dt > this.step) {
-        this.dt = this.dt - this.step;
+      while (this.dt >= this.step) {
         _update(this.step);
+        this.dt -= this.step;
       }
 
       _render(this.dt);
-
-      this.last = this.now;
       window.requestAnimationFrame(this.loop.bind(this));
     }
   };
@@ -66,12 +65,12 @@ const Game = (function() {
 
     Characters.init({
       player: [
-        {type: 'hero', width: 20, height: 35, health: 1000, x: 400, y: 300, mass: 100}
+        {type: 'hero', width: 20, height: 35, health: 1000, x: 400, y: 300, mass: 20}
       ],
       npcs: [
-        {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 100, y: 200, attackRadius: 100, mass: 600},
-        {type: 'swordknight', width: 40, height: 65, health: 1500, x: 300, y: 200, attackRadius: 80, mass: 700},
-        {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 500, y: 200, mass: 600}
+        {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 100, y: 200, attackRadius: 100, mass: 6},
+        {type: 'swordknight', width: 40, height: 65, health: 1500, x: 300, y: 200, attackRadius: 80, mass: 7},
+        {type: 'hellishsmith', width: 40, height: 75, health: 2500, x: 500, y: 200, mass: 6}
       ]
     });
 

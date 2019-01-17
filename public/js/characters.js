@@ -7,7 +7,7 @@ const Characters = (function() {
 
   const FORCES = {
     epsilon: 0.1,
-    gravity: 9.81,
+    gravity: 0.0981,
     friction: -0.99,
     drag: -0.05
   };
@@ -69,7 +69,7 @@ const Characters = (function() {
       },
       radius: 40,
       attackRadius: 40,
-      mass: player.mass || 200,
+      mass: player.mass || 20,
       direction: player.direction || 'right'
     };
 
@@ -96,7 +96,7 @@ const Characters = (function() {
       fov: 150,
       radius: npc.attackRadius || 75,
       attackRadius: npc.attackRadius || 75,
-      mass: npc.mass || 400,
+      mass: npc.mass || 40,
       direction: npc.direction || 'right'
     };
 
@@ -278,7 +278,7 @@ const Characters = (function() {
       if (Ctrls.isPressed('space')) state.dispatch('jump');
 
       if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
-        state.applyForce(new Vector(15000 * state.directionInt, 0));
+        state.applyForce(new Vector(2 * state.directionInt, 0));
       } else {
         if (state.velocity.x === 0) state.dispatch('idle');
       }
@@ -293,7 +293,8 @@ const Characters = (function() {
       }
 
       if (state.collision.hit('y')) {
-        state.applyVerticalForce(new Vector(0, -60000));
+        // state.applyVerticalForce(new Vector(0, -0.3));
+        state.applyForce(new Vector(0, -80));
         state.dispatch('fall');
       } else {
         state.dispatch('fall');
@@ -310,7 +311,7 @@ const Characters = (function() {
 
       if (!state.collision.hit('y')) {
         if (Ctrls.isPressed('a') || Ctrls.isPressed('d')) {
-          state.applyForce(new Vector(15000 * state.directionInt, 0));
+          state.applyForce(new Vector(2 * state.directionInt, 0));
         }
       } else {
         state.dispatch('idle');
@@ -383,7 +384,7 @@ const Characters = (function() {
 
       let distance = _distanceToPlayer(state);
 
-      if (distance > state.attackRadius && distance < state.fov) state.applyForce(new Vector(15000 * -state.directionInt, 0));
+      if (distance > state.attackRadius && distance < state.fov) state.applyForce(new Vector(0.3 * -state.directionInt, 0));
       if (distance < state.attackRadius) state.dispatch('attack');
     },
 
@@ -530,7 +531,7 @@ const Characters = (function() {
   }
 
   function _knockBack(state) {
-    state.applyForce(new Vector(5000 * state.directionInt, -15000));
+    state.applyForce(new Vector(0 * state.directionInt, 0));
   }
 
   function _isCriticalHit(critchance) {
@@ -546,7 +547,9 @@ const Characters = (function() {
   * @ Desc
   ******************************/
   function _updatePhysics(state, dt) {
-    state.verticalAcceleration.multiply(0.88);
+    state.dt = dt;
+    state.verticalAcceleration.multiply(0.5);
+    state.verticalAcceleration.multiply(dt);
 
     if (Math.abs(state.verticalAcceleration.y) < FORCES.epsilon) state.verticalAcceleration.y = 0;
     state.acceleration.add(state.verticalAcceleration);
@@ -555,12 +558,12 @@ const Characters = (function() {
     state.applyForce(_friction(state));
     state.applyForce(_drag(state));
 
-    state.velocity.add(state.acceleration);
+    state.velocity.add(state.acceleration.multiply(dt));
 
     if (Math.abs(state.velocity.x) < FORCES.epsilon) state.velocity.x = 0;
     if (Math.abs(state.velocity.y) < FORCES.epsilon) state.velocity.y = 0;
 
-    state.collision.update(state.id, state.position, Vector.multiply(state.velocity, dt), state.hitbox.width, state.hitbox.height);
+    state.collision.update(state.id, state.position, state.velocity, state.hitbox.width, state.hitbox.height);
 
     if (state.collision.hit('y')) state.velocity.set(state.velocity.x, 0);
     if (state.collision.hit('x')) state.velocity.set(0, state.velocity.y);
@@ -569,24 +572,23 @@ const Characters = (function() {
       DevTools.Abstractor.emit({
         name: 'playerAcceleration',
         text: 'Player acceleration: ',
-        data: Math.round(state.acceleration.x) +' / '+ Math.round(state.acceleration.y)
+        data: Math.round(state.acceleration.x) +' - '+ Math.round(state.acceleration.y)
       });
 
       DevTools.Abstractor.emit({
         name: 'playerVelocity',
         text: 'Player velocity: ',
-        data: Math.round(state.velocity.x) +' / '+ Math.round(state.velocity.y)
+        data: Math.round(state.velocity.x) +' - '+ Math.round(state.velocity.y)
       });
     }
 
-    state.velocity.multiply(dt);
+    // state.velocity.multiply(dt);
     state.position.add(state.velocity);
     state.acceleration.multiply(0);
   }
 
   function _gravity(state) {
     let f = new Vector(0, (FORCES.gravity * state.mass));
-    f.multiply(10);
     return f;
   }
 
