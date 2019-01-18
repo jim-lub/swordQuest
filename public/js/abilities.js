@@ -89,21 +89,23 @@ const Abilities = (function() {
 
       fade: false,
 
-      update: () => {
-        if (pattern.angle >= pattern.maxAngle) pattern.fade = true;
-
-        let modifiedRadius = (pattern.direction === 'left') ? pattern.radius : -pattern.radius;
-
-        pattern.position = {
-          x: pattern.origin.x + (modifiedRadius * Math.cos(pattern.angle)),
-          y: pattern.origin.y - pattern.radius * Math.sin(pattern.angle)
-        };
-
-        pattern.angle += pattern.step;
-      }
+      update: () => _updateCircularPattern(pattern)
     };
 
     return Object.assign(pattern);
+  }
+
+  function _updateCircularPattern(pattern) {
+    if (pattern.angle >= pattern.maxAngle) pattern.fade = true;
+
+    let modifiedRadius = (pattern.direction === 'left') ? pattern.radius : -pattern.radius;
+
+    pattern.position = {
+      x: pattern.origin.x + (modifiedRadius * Math.cos(pattern.angle)),
+      y: pattern.origin.y - pattern.radius * Math.sin(pattern.angle)
+    };
+
+    pattern.angle += pattern.step;
   }
 
   /********************************************************************************
@@ -130,6 +132,9 @@ const Abilities = (function() {
       direction: state.direction,
       radius: state.attackRadius,
 
+      scaleModifierX,
+      scaleModifierY,
+
       angle: (startAngle / 180) * Math.PI,
       step: ((endAngle / 180) - (startAngle / 180)) * Math.PI / pointsToEmit,
       maxAngle: (endAngle / 180) * Math.PI,
@@ -138,21 +143,23 @@ const Abilities = (function() {
 
       fade: false,
 
-      update: () => {
-        if (pattern.angle >= pattern.maxAngle) pattern.fade = true;
-
-        let modifiedRadius = (pattern.direction === 'left') ? pattern.radius : -pattern.radius;
-
-        pattern.position = {
-          x: pattern.origin.x + (modifiedRadius * Math.cos(pattern.angle)) * scaleModifierX,
-          y: pattern.origin.y - pattern.radius * Math.sin(pattern.angle) * scaleModifierY
-        };
-
-        pattern.angle += pattern.step;
-      }
+      update: () => _updateElipticalPattern(pattern)
     };
 
     return Object.assign(pattern);
+  }
+
+  function _updateElipticalPattern(pattern) {
+    if (pattern.angle >= pattern.maxAngle) pattern.fade = true;
+
+    let modifiedRadius = (pattern.direction === 'left') ? pattern.radius : -pattern.radius;
+
+    pattern.position = {
+      x: pattern.origin.x + (modifiedRadius * Math.cos(pattern.angle)) * pattern.scaleModifierX,
+      y: pattern.origin.y - pattern.radius * Math.sin(pattern.angle) * pattern.scaleModifierY
+    };
+
+    pattern.angle += pattern.step;
   }
 
   /********************************************************************************
