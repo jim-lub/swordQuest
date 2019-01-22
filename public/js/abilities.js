@@ -8,6 +8,10 @@ const Abilities = (function() {
   * @Heal: emit a healing stream originating blow the character
   ********************************************************************************/
   const canSwordSlash = (state) => ({
+    swordSlashCooldown: {
+      current: 0,
+      cooldown: 0
+    },
     swordSlash: () => {
       if(_isActiveAttackFrame(state)) {
         _emitAttackPoint(_circularPattern(state, {
@@ -35,7 +39,13 @@ const Abilities = (function() {
   });
 
   const canHeal = (state) => ({
+    healCooldown: {
+      current: 0,
+      cooldown: 500
+    },
     heal: () => {
+        if (state.healCooldown.current > 0) return;
+
         _emitHealPoint(_elipticalPattern(state, {
           startAngle: 0,
           endAngle: 60,
@@ -55,6 +65,8 @@ const Abilities = (function() {
           offsetY: 0,
           pointsToEmit: 5
         }));
+
+        state.healCooldown.current = state.healCooldown.cooldown;
     }
   });
 

@@ -14,7 +14,8 @@ const Characters = (function() {
 
     if (type === 'hero') {
       return Object.assign(state,
-            ...[hasDefaults(state), canRender(state), canBeHit(state), canBeHealed(state), isHero(state)],
+            ...[hasDefaults(state), canRender(state), canBeHit(state), canBeHealed(state), isHero(state), cooldownManager
+            (state)],
             ...[canIdle(state), canRun(state), canJump(state), canAttack(state)],
             ...[Abilities.canSwordSlash(state), Abilities.canHeal(state)]);
     }
@@ -39,6 +40,7 @@ const Characters = (function() {
   * @ Defaults
   * -------------------------------------------------------------------------------
   * @hasDefaults: contains variables and function that are applied to every character
+  * - Dispatch: checks if action is a possible transition; switches if true
   ********************************************************************************/
   const hasDefaults = (state) => ({
     id: Utils.randomID(),
@@ -59,15 +61,16 @@ const Characters = (function() {
       _updateDirection(state);
       _updatePhysics(state, dt);
 
+      if (state.cooldown) state.cooldown();
       state.checkForHits();
 
-      if (state.isPlayerControlled) state.checkForHeals();
+      if (state.checkForHeals) state.checkForHeals();
       if (!state.isPlayerControlled) state.animations.play(state.currentState, state.direction);
 
       state[state.currentState](); // Call current state function
     },
 
-    currentState: 'idle',
+    currentState: 'idle', // Default state for characters is `idle`
 
     dispatch: (actionName) => {
       const action = state.transitions[state.currentState][actionName];
@@ -396,6 +399,14 @@ const Characters = (function() {
     }
   });
 
+  const cooldownManager = (state) => ({
+    cooldown: () => {
+      if (state.heal && state.healCooldown && state.healCooldown.current > 0) {
+        state.healCooldown.current--;
+      }
+    }
+  });
+
 
   /********************************************************************************
   * @ Utility
@@ -510,6 +521,12 @@ const Characters = (function() {
       ctx.font = "bold 10px Verdana";
       ctx.fillText(Math.floor(state.health.current), Camera.convertXCoord(state.position.x + (state.hitbox.width / 2) - 36), state.position.y - 52);
 
+      // Draw heal cooldown
+      if (state.healCooldown) {
+        ctx.fillStyle = "white";
+        ctx.font = "bold 10px Verdana";
+        ctx.fillText(Math.floor(state.healCooldown.current / 60), Camera.convertXCoord(state.position.x + (state.hitbox.width / 2) + 36), state.position.y - 52);
+      }
 
 
       DevTools.Visualizer.start('characterHitbox', ctx, {

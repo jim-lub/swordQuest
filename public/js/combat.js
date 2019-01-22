@@ -43,7 +43,7 @@ const Combat = (function() {
     }).filter(point => {
       return _healPointCollision(state, point);
     }).map(point => {
-      let heal = (_isCriticalHeal(5)) ? 5 : 1;
+      let heal = (_isCriticalHeal(5)) ? 250 : 100;
 
       return {
         position: {
