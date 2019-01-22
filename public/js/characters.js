@@ -115,7 +115,7 @@ const Characters = (function() {
       width: 20,
       height: 35
     },
-    speed: 15000,
+    speed: 5,
     mass: 100,
     attackRadius: 60,
 
@@ -153,7 +153,7 @@ const Characters = (function() {
       width: 40,
       height: 75
     },
-    speed: 25000,
+    speed: 4,
     mass: 1000,
     fov: 150,
     attackRadius: 75,
@@ -188,7 +188,7 @@ const Characters = (function() {
       width: 40,
       height: 65
     },
-    speed: 25000,
+    speed: 3,
     mass: 700,
     fov: 170,
     attackRadius: 85,
@@ -552,12 +552,36 @@ const Characters = (function() {
   ******************************/
   const FORCES = {
     epsilon: 0.1,
-    gravity: 9.81,
+    gravity: 0.0981,
     friction: -0.99,
     drag: -0.05
   };
 
   function _updatePhysics(state, dt) {
+    // let force = new Vector(0 * dt, 1 * dt);
+    // state.applyForce(force);
+
+    state.applyForce(_gravity(state));
+    state.applyForce(_friction(state));
+    state.applyForce(_drag(state));
+
+    state.acceleration.multiply(dt);
+    state.velocity.add(state.acceleration);
+
+    if (Math.abs(state.velocity.x) < FORCES.epsilon) state.velocity.x = 0;
+    if (Math.abs(state.velocity.y) < FORCES.epsilon) state.velocity.y = 0;
+
+    state.collision.update(state.id, state.position, state.velocity, state.hitbox.width, state.hitbox.height);
+
+    if (state.collision.hit('y')) state.velocity.set(state.velocity.x, 0);
+    if (state.collision.hit('x')) state.velocity.set(0, state.velocity.y);
+
+    state.position.add(state.velocity);
+    state.acceleration.multiply(0);
+  }
+
+  function _updatePhysics2(state, dt) {
+    dt = dt / 10;
     state.verticalAcceleration.multiply(0.88);
 
     if (Math.abs(state.verticalAcceleration.y) < FORCES.epsilon) state.verticalAcceleration.y = 0;
@@ -584,7 +608,6 @@ const Characters = (function() {
 
   function _gravity(state) {
     let f = new Vector(0, (FORCES.gravity * state.mass));
-    f.multiply(10);
     return f;
   }
 
@@ -599,7 +622,7 @@ const Characters = (function() {
     let f = state.velocity.clone();
     let speed = state.velocity.mag();
     f.normalize();
-    f.multiply(FORCES.drag * speed * speed);
+    f.multiply(FORCES.drag * speed);
     return f;
   }
 

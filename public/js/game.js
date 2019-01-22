@@ -1,56 +1,21 @@
 /* jshint esversion: 6 */
 const Game = (function() {
-  const Lvl = new Level();
-
-  const LEVEL = [];
   const ctx = document.getElementById('canvas').getContext('2d');
 
-  const _loop = {
-    now: null,
+  const Lvl = new Level();
+  const LEVEL = [];
+
+  const animationFrameData = {
+    frameID: null,
+    running: true,
+    started: true,
     dt: 0,
-    last: null,
-    step: 1/60,
-    loop() {
-      this.now = _timestamp();
-      this.dt = this.dt + Math.min(1, (this.now - this.last) / 1000);
-
-      while (this.dt > this.step) {
-        this.dt = this.dt - this.step;
-        _update(this.step);
-      }
-
-      _render(this.dt);
-
-      this.last = this.now;
-      window.requestAnimationFrame(this.loop.bind(this));
-    }
+    lastFrameTimeMs: 0,
+    timestep: 1000 / 60,
+    fps: 60,
+    framesThisSecond: 0,
+    lastFpsUpdate: 0
   };
-
-  function _update(dt) {
-    DevTools.Components.listener();
-    Lvl.update();
-
-    Entities.update(dt);
-    Fx.update();
-    Camera.update();
-
-    Events.emit('tiles', LEVEL);
-  }
-
-  function _render(dt) {
-    ctx.clearRect(0, 0, 1280, 640);
-
-    Lvl.render(ctx);
-    Entities.render(ctx);
-    Fx.render(ctx);
-
-    ctx.fillStyle = 'black';
-    ctx.globalAlpha = 0.2;
-    LEVEL.forEach(cur => {
-      ctx.fillRect(cur.x + -Events.listen('CAMERA_OFFSET_X'), cur.y, cur.width, cur.height);
-    });
-    ctx.globalAlpha = 1;
-  }
 
   function init() {
     let spacingX = -300;
@@ -70,14 +35,102 @@ const Game = (function() {
       {type: 'hero', isPlayerControlled: true, spawnPosition: {x: 350, y: 150}}
     ]);
 
-    window.requestAnimationFrame(_loop.loop.bind(_loop));
+    animationFrameData.frameID = requestAnimationFrame(loop);
+  }
+
+  function loop() {
+
+    if (_timestamp() > animationFrameData.lastFpsUpdate + 1000) {
+      animationFrameData.fps = 0.25 * animationFrameData.framesThisSecond + (1 - 0.25) * animationFrameData.fps;
+
+      animationFrameData.lastFpsUpdate = _timestamp();
+      animationFrameData.framesThisSecond = 0;
+    }
+    animationFrameData.framesThisSecond++;
+
+    animationFrameData.dt += _timestamp() - animationFrameData.lastFrameTimeMs;
+    animationFrameData.lastFrameTimeMs = _timestamp();
+
+    let numUpdateSteps = 0;
+    while (animationFrameData.dt >= animationFrameData.timestep) {
+      _update(animationFrameData.timestep);
+      animationFrameData.dt -= animationFrameData.timestep;
+
+      if (++numUpdateSteps >= 240) {
+        _panic();
+        break;
+      }
+    }
+
+    _render();
+
+    animationFrameData.frameID = requestAnimationFrame(loop);
+  }
+
+  function _panic() {
+    animationFrameData.dt = 0;
+  }
+
+  function start() {
+    if (!animationFrameData.started) {
+      animationFrameData.started = true;
+
+      animationFrameData.frameID = requestAnimationFrame(function(timestamp) {
+        _render(1);
+        animationFrameData.running = true;
+
+        animationFrameData.lastFrameTimeMs = _timestamp();
+        animationFrameData.lastFpsUpdate = _timestamp();
+
+        animationFrameData.framesThisSecond = 0;
+
+        animationFrameData.frameID = requestAnimationFrame(loop);
+      });
+    }
+
+  }
+
+  function stop() {
+    animationFrameData.running = false;
+    animationFrameData.started = false;
+
+    cancelAnimationFrame(animationFrameData.frameID);
   }
 
   function _timestamp() {
     return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
   }
 
-  return {
-    init
-  };
+  function _update(dt) {
+    DevTools.Components.listener();
+    Lvl.update();
+
+    Entities.update(dt);
+    Fx.update();
+    Camera.update();
+
+    Events.emit('tiles', LEVEL);
+
+    DevTools.Abstractor.emit({
+      name: 'FPS',
+      text: 'FPS: ',
+      data: Math.round(animationFrameData.fps)
+    });
+  }
+  function _render() {
+    ctx.clearRect(0, 0, 1280, 640);
+
+    Lvl.render(ctx);
+    Entities.render(ctx);
+    Fx.render(ctx);
+
+    ctx.fillStyle = 'black';
+    ctx.globalAlpha = 0.2;
+    LEVEL.forEach(cur => {
+      ctx.fillRect(cur.x + -Events.listen('CAMERA_OFFSET_X'), cur.y, cur.width, cur.height);
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  return { init, start, stop };
 }());
